@@ -47,8 +47,8 @@ button{font-family:inherit}
 @keyframes bl{0%,100%{opacity:1}50%{opacity:.2}}
 .mapw{flex:1;position:relative}
 #map{width:100%;height:100%}
-.leaflet-container{background:#0d1117}
-.dp{position:absolute;top:8px;right:8px;width:300px;max-height:calc(100% - 16px);background:rgba(22,27,34,.96);border:1px solid #30363d;border-radius:12px;overflow-y:auto;z-index:50;display:none}
+.leaflet-container{background:#0d1117} .leaflet-pane{z-index:400!important} .leaflet-top,.leaflet-bottom{z-index:800!important}
+.dp{position:absolute;top:8px;right:8px;width:300px;max-height:calc(100% - 16px);background:rgba(22,27,34,.96);border:1px solid #30363d;border-radius:12px;overflow-y:auto;z-index:99999;display:none}
 .dp.show{display:block}
 .dp-h{padding:12px;border-bottom:1px solid #21262d;display:flex;justify-content:space-between;align-items:center}
 .dp-x{width:24px;height:24px;border:none;border-radius:5px;background:#21262d;color:#8b949e;cursor:pointer;font-size:12px}
