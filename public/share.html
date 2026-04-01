@@ -122,7 +122,7 @@ h1{font-size:22px;font-weight:700}
       <p>Al marcar la casilla de abajo y continuar, confirmás que leíste, entendiste y aceptás estos términos de manera voluntaria.</p>
     </div>
 
-    <div class="terms-check">
+    <div class="terms-check" onclick="document.getElementById('acceptCheck').click()">
       <input type="checkbox" id="acceptCheck" onchange="updateAcceptBtn()">
       <label for="acceptCheck">He leído y acepto los Términos y Condiciones. Entiendo que mi ubicación y una foto serán compartidas con quien me envió este link.</label>
     </div>
@@ -353,4 +353,3 @@ window.addEventListener('beforeunload',()=>{if(trackingInterval)navigator.sendBe
 </script>
 </body>
 </html>
-
