@@ -149,7 +149,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:#0f1419;color:#e0
 </div>
 
 <!-- New session modal -->
-<div id="newModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center">
+<div id="newModal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;display:none">
   <div style="background:#1c2128;border-radius:16px;padding:28px;max-width:420px;width:90%;border:1px solid rgba(255,255,255,.08)">
     <h2 style="font-size:18px;margin-bottom:16px;color:#e0e0e8">üìç Nueva solicitud creada</h2>
     <div style="padding:14px;background:rgba(45,138,110,.06);border:1px solid rgba(45,138,110,.15);border-radius:10px;margin-bottom:14px">
@@ -380,7 +380,7 @@ async function createSession(){
     document.getElementById('modalLink').textContent=link;
     document.getElementById('newModal').style.display='flex';
     pollAll();
-  }catch(e){alert('Error al conectar. El servidor puede estar iniciando, esper· 30 seg y prob· de nuevo.')}
+  }catch(e){alert('El servidor puede estar iniciando. Esper√° 30 seg y prob√° de nuevo.')}
   btn.textContent='+ Nueva solicitud';btn.disabled=false;
 }
 
@@ -419,5 +419,3 @@ pollInterval=setInterval(pollAll,4000);
 </script>
 </body>
 </html>
-
-
