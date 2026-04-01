@@ -8,10 +8,8 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// ─── In-memory store (for production, use a database) ───
 const sessions = new Map();
 
-// Clean old sessions every hour (> 24h)
 setInterval(() => {
   const now = Date.now();
   for (const [id, s] of sessions) {
@@ -19,47 +17,59 @@ setInterval(() => {
   }
 }, 3600000);
 
-// ─── API Routes ───
-
 // Create session
 app.post("/api/session", (req, res) => {
   const id = crypto.randomBytes(4).toString("hex");
   sessions.set(id, {
     id,
     created: Date.now(),
-    location: null,
+    points: [],
+    active: false,
+    stopped: false,
   });
   res.json({ id, url: `/s/${id}` });
 });
 
-// Get session (creator polls this)
+// Get session (creator polls)
 app.get("/api/session/:id", (req, res) => {
   const session = sessions.get(req.params.id);
   if (!session) return res.status(404).json({ error: "Sesión no encontrada" });
   res.json({
     id: session.id,
-    hasLocation: !!session.location,
-    location: session.location,
+    active: session.active,
+    stopped: session.stopped,
+    openedAt: session.openedAt || null,
+    pointCount: session.points.length,
+    points: session.points,
   });
 });
 
-// Store location (recipient sends this)
+// Add location point
 app.post("/api/location/:id", (req, res) => {
   const session = sessions.get(req.params.id);
   if (!session) return res.status(404).json({ error: "Sesión no encontrada" });
-  if (session.location) return res.status(400).json({ error: "Ubicación ya compartida" });
+  if (session.stopped) return res.status(400).json({ error: "Sesión detenida" });
 
   const { lat, lng, accuracy } = req.body;
   if (typeof lat !== "number" || typeof lng !== "number") {
     return res.status(400).json({ error: "Datos inválidos" });
   }
 
-  session.location = {
-    lat,
-    lng,
+  session.active = true;
+  session.points.push({
+    lat, lng,
     accuracy: accuracy || null,
     timestamp: new Date().toISOString(),
-  };
+  });
+  res.json({ ok: true });
+});
+
+// Stop tracking
+app.post("/api/stop/:id", (req, res) => {
+  const session = sessions.get(req.params.id);
+  if (!session) return res.status(404).json({ error: "Sesión no encontrada" });
+  session.active = false;
+  session.stopped = true;
   res.json({ ok: true });
 });
 
@@ -67,10 +77,12 @@ app.post("/api/location/:id", (req, res) => {
 app.get("/s/:id", (req, res) => {
   const session = sessions.get(req.params.id);
   if (!session) return res.status(404).send("Link no válido o expirado.");
+  if (!session.openedAt) {
+    session.openedAt = new Date().toISOString();
+  }
   res.sendFile(path.join(__dirname, "public", "share.html"));
 });
 
-// Serve creator page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });

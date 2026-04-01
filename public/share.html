@@ -3,101 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Solicitud de ubicación</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Solicitud de recorrido</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'DM Sans', -apple-system, sans-serif;
-    background: linear-gradient(160deg, #f0f7f4 0%, #e8f0ed 40%, #f5f0e8 100%);
-    min-height: 100vh; padding: 20px; color: #1a3a2e;
-  }
-  .card {
-    max-width: 480px; margin: 20px auto; background: #fff;
-    border-radius: 20px; padding: 32px 28px;
-    box-shadow: 0 2px 24px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.03);
-  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',-apple-system,sans-serif;background:linear-gradient(160deg,#f0f7f4,#e8f0ed 40%,#f5f0e8);min-height:100vh;padding:20px;color:#1a3a2e}
+  .card{max-width:480px;margin:20px auto;background:#fff;border-radius:20px;padding:32px 28px;box-shadow:0 2px 24px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.03)}
 
-  .header { text-align: center; margin-bottom: 24px; }
-  .shield {
-    width: 60px; height: 60px; border-radius: 16px;
-    background: rgba(45,138,110,0.08); margin: 0 auto 14px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  h1 { font-size: 22px; font-weight: 700; }
+  .header{text-align:center;margin-bottom:24px}
+  .shield{width:60px;height:60px;border-radius:16px;background:rgba(45,138,110,.08);margin:0 auto 14px;display:flex;align-items:center;justify-content:center}
+  h1{font-size:22px;font-weight:700}
 
-  .info-box {
-    display: flex; gap: 14px; padding: 18px;
-    background: rgba(45,138,110,0.04); border: 1px solid rgba(45,138,110,0.12);
-    border-radius: 14px; margin-bottom: 18px;
-  }
-  .info-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
-  .info-text { font-size: 14px; color: #1a3a2e; line-height: 1.5; margin-bottom: 6px; }
-  .info-sub { font-size: 13px; color: #5a6a70; line-height: 1.6; }
+  .info-box{display:flex;gap:14px;padding:18px;border-radius:14px;margin-bottom:18px}
+  .info-green{background:rgba(45,138,110,.04);border:1px solid rgba(45,138,110,.12)}
+  .info-yellow{background:rgba(232,197,71,.06);border:1px solid rgba(232,197,71,.2)}
+  .info-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+  .info-text{font-size:14px;color:#1a3a2e;line-height:1.5;margin-bottom:6px}
+  .info-sub{font-size:13px;color:#5a6a70;line-height:1.6}
 
-  .transparency {
-    padding: 18px; background: rgba(100,130,160,0.04);
-    border: 1px solid rgba(100,130,160,0.1);
-    border-radius: 14px; margin-bottom: 24px;
-  }
-  .transparency-title { font-size: 13px; font-weight: 600; color: #3a5a6e; margin-bottom: 12px; }
-  .transparency ul { list-style: none; padding: 0; }
-  .transparency li {
-    font-size: 13px; color: #5a6a70; line-height: 2;
-    padding-left: 20px; position: relative;
-  }
-  .transparency li::before {
-    content: "✓"; color: #2d8a6e; font-weight: 600;
-    position: absolute; left: 0;
-  }
+  .transparency{padding:18px;background:rgba(100,130,160,.04);border:1px solid rgba(100,130,160,.1);border-radius:14px;margin-bottom:24px}
+  .transparency-title{font-size:13px;font-weight:600;color:#3a5a6e;margin-bottom:12px}
+  .transparency ul{list-style:none;padding:0}
+  .transparency li{font-size:13px;color:#5a6a70;line-height:2;padding-left:22px;position:relative}
+  .transparency li::before{content:"✓";color:#2d8a6e;font-weight:600;position:absolute;left:0}
 
-  .warn-box {
-    display: flex; gap: 14px; padding: 18px;
-    background: rgba(232,197,71,0.06); border: 1px solid rgba(232,197,71,0.2);
-    border-radius: 14px; margin-bottom: 18px;
-  }
+  .btn-primary{width:100%;padding:16px;border:none;border-radius:14px;background:#1a6b52;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 12px rgba(26,107,82,.2);transition:.2s}
+  .btn-secondary{width:100%;padding:14px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:transparent;color:#6a7a7e;font-size:14px;cursor:pointer;font-family:inherit;margin-top:10px}
+  .btn-stop{width:100%;padding:18px;border:none;border-radius:14px;background:#dc3c3c;color:#fff;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 2px 12px rgba(220,60,60,.2)}
 
-  .btn-primary {
-    width: 100%; padding: 16px; border: none; border-radius: 14px;
-    background: #1a6b52; color: #fff; font-size: 15px; font-weight: 600;
-    cursor: pointer; font-family: inherit; transition: all 0.2s;
-    box-shadow: 0 2px 12px rgba(26,107,82,0.2);
-  }
-  .btn-primary:hover { background: #15573f; }
-  .btn-secondary {
-    width: 100%; padding: 14px; border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 12px; background: transparent; color: #6a7a7e;
-    font-size: 14px; cursor: pointer; font-family: inherit; margin-top: 10px;
-  }
+  .error-box{padding:12px 16px;background:rgba(220,60,60,.06);border:1px solid rgba(220,60,60,.15);border-radius:10px;font-size:13px;color:#c04040;margin-bottom:16px}
 
-  .error-box {
-    padding: 12px 16px; background: rgba(220,60,60,0.06);
-    border: 1px solid rgba(220,60,60,0.15); border-radius: 10px;
-    font-size: 13px; color: #c04040; margin-bottom: 16px;
-  }
+  .sharing-active{text-align:center;padding:20px 0;animation:fadeUp .4s ease}
+  .sharing-pulse{width:60px;height:60px;border-radius:50%;background:rgba(45,138,110,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;animation:glow 2s ease infinite}
+  .sharing-dot{width:20px;height:20px;border-radius:50%;background:#2d8a6e}
+  .sharing-title{font-size:18px;font-weight:600;color:#2d8a6e;margin-bottom:6px}
+  .sharing-sub{font-size:13px;color:#6a7a7e;line-height:1.6}
+  .sharing-stats{display:flex;justify-content:center;gap:24px;margin:20px 0;font-size:13px;color:#5a6a70}
+  .sharing-stats span{font-weight:600;color:#1a3a2e}
 
-  .spinner {
-    width: 32px; height: 32px; border: 3px solid rgba(45,138,110,0.15);
-    border-top-color: #2d8a6e; border-radius: 50%;
-    animation: spin 0.8s linear infinite; margin: 0 auto;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .result{text-align:center;padding:30px 0;animation:fadeUp .4s ease}
+  .result-icon{font-size:48px;margin-bottom:16px}
+  .result-title{font-size:20px;font-weight:600;margin-bottom:8px}
+  .result-text{font-size:14px;color:#6a7a7e;line-height:1.6}
+  .result-sub{font-size:12px;color:#9aaa9e;margin-top:16px}
 
-  .result { text-align: center; padding: 30px 0; animation: fadeUp 0.4s ease; }
-  .result-icon { font-size: 48px; margin-bottom: 16px; }
-  .result-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
-  .result-text { font-size: 14px; color: #6a7a7e; line-height: 1.6; }
-  .result-sub { font-size: 12px; color: #9aaa9e; margin-top: 16px; }
+  .footer{text-align:center;margin-top:28px;padding-top:18px;border-top:1px solid rgba(0,0,0,.04);font-size:11px;color:#aab8b0}
 
-  .footer {
-    text-align: center; margin-top: 28px; padding-top: 18px;
-    border-top: 1px solid rgba(0,0,0,0.04);
-    font-size: 11px; color: #aab8b0;
-  }
-
-  .step { display: none; }
-  .step.active { display: block; animation: fadeUp 0.3s ease; }
+  .step{display:none}.step.active{display:block;animation:fadeUp .3s ease}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(45,138,110,.3)}50%{box-shadow:0 0 0 16px rgba(45,138,110,0)}}
+  .spinner{width:32px;height:32px;border:3px solid rgba(45,138,110,.15);border-top-color:#2d8a6e;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -109,16 +65,16 @@
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
       </svg>
     </div>
-    <h1>Solicitud de ubicación</h1>
+    <h1>Solicitud de recorrido</h1>
   </div>
 
   <!-- Step 1: Info -->
   <div id="step-info" class="step active">
-    <div class="info-box">
+    <div class="info-box info-green">
       <div class="info-icon">📍</div>
       <div>
-        <p class="info-text"><strong>Alguien te envió este link para pedirte tu ubicación.</strong></p>
-        <p class="info-sub">Si aceptás, tu navegador te va a pedir permiso de geolocalización. Tu ubicación se comparte <strong>una sola vez</strong>, no se rastrea en tiempo real.</p>
+        <p class="info-text"><strong>Alguien te pide seguir tu recorrido en tiempo real.</strong></p>
+        <p class="info-sub">Si aceptás, tu ubicación se va a compartir <strong>cada 1 minuto</strong> mientras tengas esta página abierta. Podés frenar en cualquier momento con un botón.</p>
       </div>
     </div>
 
@@ -126,10 +82,11 @@
       <div class="transparency-title">🔍 Qué pasa exactamente si aceptás:</div>
       <ul>
         <li>Tu navegador te pide permiso para acceder al GPS</li>
-        <li>Si das permiso, se obtiene tu ubicación una vez</li>
-        <li>La ubicación se comparte con quien te envió este link</li>
+        <li>Tu ubicación se envía cada 1 minuto mientras la página esté abierta</li>
+        <li>La persona que te envió el link ve tu recorrido en un mapa</li>
+        <li>Podés frenar cuando quieras con el botón DETENER</li>
+        <li>Si cerrás la página, también se detiene</li>
         <li>No se instala nada ni se accede a tus datos</li>
-        <li>Podés rechazarlo sin ninguna consecuencia</li>
       </ul>
     </div>
 
@@ -139,43 +96,58 @@
 
   <!-- Step 2: Confirm -->
   <div id="step-confirm" class="step">
-    <div class="warn-box">
+    <div class="info-box info-yellow">
       <div class="info-icon">⚠️</div>
       <div>
         <p class="info-text"><strong>Confirmación final</strong></p>
-        <p class="info-sub">Al tocar "Compartir", tu navegador te va a pedir permiso. Si aceptás ahí, tu ubicación se envía a quien creó este link.</p>
+        <p class="info-sub">Al tocar "Iniciar", tu navegador va a pedir permiso de GPS. Tu recorrido se comparte en tiempo real hasta que lo frenes.</p>
       </div>
     </div>
-
-    <div id="error" class="error-box" style="display:none;"></div>
-
-    <button class="btn-primary" onclick="shareLocation()">📍 Compartir mi ubicación</button>
+    <div id="error" class="error-box" style="display:none"></div>
+    <button class="btn-primary" onclick="startSharing()">📍 Iniciar seguimiento</button>
     <button class="btn-secondary" onclick="goTo('info')">← Volver</button>
   </div>
 
-  <!-- Step 3: Sharing -->
-  <div id="step-sharing" class="step" style="text-align:center; padding: 40px 0;">
+  <!-- Step 3: Getting first location -->
+  <div id="step-starting" class="step" style="text-align:center;padding:40px 0">
     <div class="spinner"></div>
-    <p style="color:#5a6a70; margin-top:20px; font-size:15px;">Obteniendo tu ubicación...</p>
-    <p style="color:#8a9a9e; font-size:12px;">Tu navegador debería mostrarte un cartel de permiso</p>
+    <p style="color:#5a6a70;margin-top:20px;font-size:15px">Obteniendo tu ubicación...</p>
+    <p style="color:#8a9a9e;font-size:12px">Tu navegador debería mostrarte un cartel de permiso</p>
   </div>
 
-  <!-- Step 4: Done -->
-  <div id="step-done" class="step">
-    <div class="result">
-      <div class="result-icon">✅</div>
-      <div class="result-title" style="color:#2d8a6e;">Ubicación compartida</div>
-      <div class="result-text">Tu ubicación fue enviada correctamente.</div>
-      <div class="result-text" id="accuracyText"></div>
-      <div class="result-sub">Podés cerrar esta página. No se seguirá rastreando tu ubicación.</div>
+  <!-- Step 4: Sharing active -->
+  <div id="step-sharing" class="step">
+    <div class="sharing-active">
+      <div class="sharing-pulse"><div class="sharing-dot"></div></div>
+      <div class="sharing-title">Compartiendo recorrido</div>
+      <div class="sharing-sub">Tu ubicación se actualiza cada 1 minuto</div>
+
+      <div class="sharing-stats">
+        <div>Puntos: <span id="pointCount">1</span></div>
+        <div>Tiempo: <span id="elapsed">0m</span></div>
+      </div>
+
+      <button class="btn-stop" onclick="stopSharing()">⬛ DETENER</button>
+
+      <p style="color:#9aaa9e;font-size:11px;margin-top:16px">También podés cerrar esta página para detener</p>
     </div>
   </div>
 
-  <!-- Step 5: Declined -->
+  <!-- Step 5: Stopped -->
+  <div id="step-stopped" class="step">
+    <div class="result">
+      <div class="result-icon">✅</div>
+      <div class="result-title" style="color:#2d8a6e">Seguimiento finalizado</div>
+      <div class="result-text">Se compartieron <strong id="finalPoints">0</strong> puntos de ubicación.</div>
+      <div class="result-sub">Podés cerrar esta página. Ya no se comparte tu ubicación.</div>
+    </div>
+  </div>
+
+  <!-- Step 6: Declined -->
   <div id="step-declined" class="step">
     <div class="result">
       <div class="result-icon">👍</div>
-      <div class="result-title" style="color:#5a6a70;">Sin problema</div>
+      <div class="result-title" style="color:#5a6a70">Sin problema</div>
       <div class="result-text">No se compartió ninguna información.</div>
       <div class="result-sub">Podés cerrar esta página tranquilamente.</div>
     </div>
@@ -185,69 +157,130 @@
 </div>
 
 <script>
-  // Get session ID from URL
-  const sessionId = window.location.pathname.split('/s/')[1];
+const sessionId = window.location.pathname.split('/s/')[1];
+let trackingInterval = null;
+let pointsSent = 0;
+let startTime = null;
 
-  function goTo(step) {
-    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-    document.getElementById('step-' + step).classList.add('active');
+function goTo(step) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + step).classList.add('active');
+}
+
+function showError(msg) {
+  const el = document.getElementById('error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function startSharing() {
+  goTo('starting');
+
+  if (!navigator.geolocation) {
+    showError('Tu navegador no soporta geolocalización.');
+    goTo('confirm');
+    return;
   }
 
-  function showError(msg) {
-    const el = document.getElementById('error');
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
-
-  function shareLocation() {
-    goTo('sharing');
-
-    if (!navigator.geolocation) {
-      showError('Tu navegador no soporta geolocalización.');
-      goTo('confirm');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const res = await fetch(`/api/location/${sessionId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              lat: pos.coords.latitude,
-              lng: pos.coords.longitude,
-              accuracy: pos.coords.accuracy,
-            }),
-          });
-
-          if (res.ok) {
-            const acc = Math.round(pos.coords.accuracy);
-            document.getElementById('accuracyText').textContent = `Precisión: ~${acc} metros`;
-            goTo('done');
-          } else {
-            const data = await res.json();
-            showError(data.error || 'Error al enviar la ubicación.');
-            goTo('confirm');
-          }
-        } catch (e) {
-          showError('Error de conexión. Intentá de nuevo.');
-          goTo('confirm');
-        }
-      },
-      (err) => {
-        const msgs = {
-          1: 'Permiso denegado. Podés habilitarlo en la configuración de tu navegador.',
-          2: 'No se pudo determinar tu ubicación. Intentá de nuevo.',
-          3: 'La solicitud tardó demasiado. Intentá de nuevo.',
-        };
-        showError(msgs[err.code] || 'Error desconocido.');
+  // Get first position
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const ok = await sendLocation(pos);
+      if (ok) {
+        startTime = Date.now();
+        pointsSent = 1;
+        goTo('sharing');
+        // Start interval for every 60 seconds
+        trackingInterval = setInterval(getAndSend, 60000);
+        updateElapsed();
+      } else {
+        showError('Error al enviar la ubicación.');
         goTo('confirm');
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
-  }
-</script>
+      }
+    },
+    (err) => {
+      const msgs = {
+        1: 'Permiso denegado. Podés habilitarlo en la configuración de tu navegador.',
+        2: 'No se pudo determinar tu ubicación. Intentá de nuevo.',
+        3: 'La solicitud tardó demasiado. Intentá de nuevo.',
+      };
+      showError(msgs[err.code] || 'Error desconocido.');
+      goTo('confirm');
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
 
+function getAndSend() {
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const ok = await sendLocation(pos);
+      if (ok) {
+        pointsSent++;
+        document.getElementById('pointCount').textContent = pointsSent;
+      }
+    },
+    () => {},
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+
+async function sendLocation(pos) {
+  try {
+    const res = await fetch(`/api/location/${sessionId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+      }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      if (data.error === 'Sesión detenida') {
+        clearInterval(trackingInterval);
+        document.getElementById('finalPoints').textContent = pointsSent;
+        goTo('stopped');
+      }
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function stopSharing() {
+  clearInterval(trackingInterval);
+  try {
+    await fetch(`/api/stop/${sessionId}`, { method: 'POST' });
+  } catch (e) {}
+  document.getElementById('finalPoints').textContent = pointsSent;
+  goTo('stopped');
+}
+
+function updateElapsed() {
+  setInterval(() => {
+    if (!startTime) return;
+    const mins = Math.round((Date.now() - startTime) / 60000);
+    const el = document.getElementById('elapsed');
+    if (el) {
+      if (mins >= 60) {
+        el.textContent = Math.floor(mins/60) + 'h ' + (mins%60) + 'm';
+      } else {
+        el.textContent = mins + 'm';
+      }
+    }
+  }, 10000);
+}
+
+// Stop on page close
+window.addEventListener('beforeunload', () => {
+  if (trackingInterval) {
+    navigator.sendBeacon(`/api/stop/${sessionId}`, '{}');
+  }
+});
+</script>
 </body>
 </html>
