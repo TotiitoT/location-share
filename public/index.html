@@ -5,64 +5,83 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Location Share — Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'DM Sans',-apple-system,sans-serif;background:linear-gradient(160deg,#f0f7f4,#e8f0ed 40%,#f5f0e8);min-height:100vh;padding:16px;color:#1a3a2e}
-  .card{max-width:560px;margin:12px auto;background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 2px 24px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.03)}
-  h1{font-size:22px;font-weight:700}
-  .subtitle{color:#6a7a7e;font-size:13px;margin-bottom:24px}
-  .btn-primary{width:100%;padding:16px;border:none;border-radius:14px;background:#1a6b52;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 12px rgba(26,107,82,.2);transition:.2s}
-  .btn-primary:hover{background:#15573f}
-  .btn-secondary{width:100%;padding:12px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:transparent;color:#6a7a7e;font-size:13px;cursor:pointer;font-family:inherit;margin-top:10px}
-  .btn-stop{width:100%;padding:14px;border:none;border-radius:12px;background:#dc3c3c;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:linear-gradient(160deg,#f0f7f4,#e8f0ed 40%,#f5f0e8);min-height:100vh;padding:16px;color:#1a3a2e}
+.card{max-width:560px;margin:12px auto;background:#fff;border-radius:20px;padding:28px 24px;box-shadow:0 2px 24px rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.03)}
+h1{font-size:22px;font-weight:700}
+h2{font-size:17px;font-weight:600;margin-bottom:14px}
+.subtitle{color:#6a7a7e;font-size:13px;margin-bottom:24px}
 
-  .steps{background:rgba(45,138,110,.03);border:1px solid rgba(45,138,110,.08);border-radius:14px;padding:18px;margin-bottom:24px}
-  .steps-title{font-size:12px;font-weight:600;color:#2d8a6e;margin-bottom:12px;letter-spacing:.5px}
-  .step{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;color:#5a6a70}
-  .step:last-child{margin-bottom:0}
-  .step-num{width:24px;height:24px;border-radius:50%;background:#2d8a6e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.btn-primary{width:100%;padding:16px;border:none;border-radius:14px;background:#1a6b52;color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 12px rgba(26,107,82,.2);transition:.2s}
+.btn-primary:hover{background:#15573f}
+.btn-sm{padding:8px 14px;border:1px solid rgba(0,0,0,.08);border-radius:8px;background:transparent;color:#6a7a7e;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
+.btn-stop{width:100%;padding:14px;border:none;border-radius:12px;background:#dc3c3c;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px}
+.btn-copy{width:100%;padding:12px;border:none;border-radius:12px;background:#1a6b52;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-copy.copied{background:#2d8a6e}
 
-  .share-box{background:rgba(0,0,0,.015);border:1px solid rgba(0,0,0,.06);border-radius:14px;padding:18px;margin-bottom:16px}
-  .share-label{font-size:12px;font-weight:600;color:#6a7a7e;letter-spacing:.5px;margin-bottom:8px}
-  .share-link{padding:12px;background:#fff;border:1px solid rgba(45,138,110,.2);border-radius:10px;font-family:'JetBrains Mono';font-size:12px;color:#1a6b52;word-break:break-all;margin-bottom:10px;line-height:1.5;user-select:all}
-  .share-hint{font-size:11px;color:#9aaa9e;margin-bottom:12px}
-  .btn-copy{width:100%;padding:12px;border:none;border-radius:12px;background:#1a6b52;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
-  .btn-copy.copied{background:#2d8a6e}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:rgba(0,0,0,.02);border-radius:10px;padding:4px}
+.tab{flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:500;background:transparent;color:#6a7a7e;transition:.2s}
+.tab.active{background:rgba(45,138,110,.1);color:#1a6b52}
 
-  .status-bar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;font-weight:500}
-  .status-bar.waiting{background:rgba(200,180,100,.08);border:1px solid rgba(200,180,100,.2);color:#9a8a50}
-  .status-bar.active{background:rgba(45,138,110,.08);border:1px solid rgba(45,138,110,.2);color:#2d8a6e}
-  .status-bar.stopped{background:rgba(120,120,140,.08);border:1px solid rgba(120,120,140,.15);color:#6a6a80}
-  .pulse{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-  .pulse.waiting{background:#c8a840;animation:pulse 1.5s infinite}
-  .pulse.active{background:#2d8a6e;animation:pulse 1s infinite}
-  .pulse.stopped{background:#8a8a9e}
+.steps{background:rgba(45,138,110,.03);border:1px solid rgba(45,138,110,.08);border-radius:14px;padding:18px;margin-bottom:24px}
+.steps-title{font-size:12px;font-weight:600;color:#2d8a6e;margin-bottom:12px;letter-spacing:.5px}
+.step{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;color:#5a6a70}
+.step:last-child{margin-bottom:0}
+.step-num{width:24px;height:24px;border-radius:50%;background:#2d8a6e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
 
-  .stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
-  .stat-box{padding:12px;background:rgba(45,138,110,.04);border:1px solid rgba(45,138,110,.08);border-radius:10px;text-align:center}
-  .stat-value{font-size:18px;font-weight:700;color:#1a3a2e;font-family:'JetBrains Mono'}
-  .stat-label{font-size:10px;color:#6a8a7e;letter-spacing:.5px;margin-top:2px}
+.share-box{background:rgba(0,0,0,.015);border:1px solid rgba(0,0,0,.06);border-radius:14px;padding:18px;margin-bottom:16px}
+.share-label{font-size:12px;font-weight:600;color:#6a7a7e;letter-spacing:.5px;margin-bottom:8px}
+.share-link{padding:12px;background:#fff;border:1px solid rgba(45,138,110,.2);border-radius:10px;font-family:'JetBrains Mono';font-size:12px;color:#1a6b52;word-break:break-all;margin-bottom:10px;line-height:1.5;user-select:all}
+.share-hint{font-size:11px;color:#9aaa9e;margin-bottom:12px}
 
-  #map{height:350px;border-radius:14px;border:1px solid rgba(45,138,110,.15);margin-bottom:16px}
-  .maps-link{display:block;text-align:center;padding:12px;background:rgba(45,138,110,.06);border:1px solid rgba(45,138,110,.15);border-radius:12px;color:#1a6b52;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:12px}
+.status-bar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;font-weight:500}
+.status-bar.waiting{background:rgba(200,180,100,.08);border:1px solid rgba(200,180,100,.2);color:#9a8a50}
+.status-bar.active{background:rgba(45,138,110,.08);border:1px solid rgba(45,138,110,.2);color:#2d8a6e}
+.status-bar.stopped{background:rgba(120,120,140,.08);border:1px solid rgba(120,120,140,.15);color:#6a6a80}
+.pulse{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pulse.waiting{background:#c8a840;animation:pulse 1.5s infinite}
+.pulse.active{background:#2d8a6e;animation:pulse 1s infinite}
+.pulse.stopped{background:#8a8a9e}
 
-  .points-box{max-height:200px;overflow-y:auto;border:1px solid rgba(0,0,0,.05);border-radius:12px;margin-bottom:16px}
-  .point-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.03);font-size:12px}
-  .point-row:last-child{border-bottom:none}
-  .point-idx{width:24px;height:24px;border-radius:50%;background:rgba(45,138,110,.1);color:#2d8a6e;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-right:10px}
-  .point-coords{color:#3a4a4e;font-family:'JetBrains Mono';font-size:11px}
-  .point-time{color:#8a9a9e;font-size:11px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.stat-box{padding:12px;background:rgba(45,138,110,.04);border:1px solid rgba(45,138,110,.08);border-radius:10px;text-align:center}
+.stat-value{font-size:18px;font-weight:700;color:#1a3a2e;font-family:'JetBrains Mono'}
+.stat-label{font-size:10px;color:#6a8a7e;letter-spacing:.5px;margin-top:2px}
 
-  .header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-  .footer{text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid rgba(0,0,0,.04);font-size:11px;color:#aab8b0}
+#map{height:320px;border-radius:14px;border:1px solid rgba(45,138,110,.15);margin-bottom:16px}
+.maps-link{display:block;text-align:center;padding:12px;background:rgba(45,138,110,.06);border:1px solid rgba(45,138,110,.15);border-radius:12px;color:#1a6b52;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:12px}
 
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-  .hidden{display:none}
-  .spinner{width:28px;height:28px;border:3px solid rgba(180,160,80,.2);border-top-color:#c8a840;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
-  @keyframes spin{to{transform:rotate(360deg)}}
+.points-box{max-height:180px;overflow-y:auto;border:1px solid rgba(0,0,0,.05);border-radius:12px;margin-bottom:16px}
+.point-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.03);font-size:12px}
+.point-row:last-child{border-bottom:none}
+.point-idx{width:22px;height:22px;border-radius:50%;background:rgba(45,138,110,.1);color:#2d8a6e;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-right:8px}
+.point-coords{color:#3a4a4e;font-family:'JetBrains Mono';font-size:11px}
+.point-time{color:#8a9a9e;font-size:11px}
+
+.photo-box{text-align:center;margin:16px 0;padding:16px;background:rgba(45,138,110,.03);border:1px solid rgba(45,138,110,.1);border-radius:14px}
+.photo-box img{max-width:100%;max-height:300px;border-radius:10px;border:2px solid rgba(45,138,110,.2)}
+.photo-time{font-size:11px;color:#6a8a7e;margin-top:8px}
+
+/* History */
+.history-item{padding:16px;border:1px solid rgba(0,0,0,.06);border-radius:14px;margin-bottom:10px;cursor:pointer;transition:.2s}
+.history-item:hover{border-color:rgba(45,138,110,.2);background:rgba(45,138,110,.02)}
+.history-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.history-id{font-family:'JetBrains Mono';font-size:13px;font-weight:600;color:#1a6b52}
+.history-badge{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.5px}
+.badge-active{background:rgba(45,138,110,.1);color:#2d8a6e}
+.badge-stopped{background:rgba(120,120,140,.1);color:#6a6a80}
+.badge-waiting{background:rgba(200,180,100,.1);color:#9a8a50}
+.history-details{font-size:12px;color:#6a7a7e;line-height:1.8}
+.history-photo-thumb{width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid rgba(0,0,0,.1)}
+
+.header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.footer{text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid rgba(0,0,0,.04);font-size:11px;color:#aab8b0}
+.hidden{display:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -73,251 +92,287 @@
     <div style="text-align:center;margin-bottom:20px">
       <div style="font-size:48px;margin-bottom:10px">📍</div>
       <h1>Location Share</h1>
-      <p class="subtitle">Seguimiento de recorrido en tiempo real — transparente y con consentimiento.</p>
+      <p class="subtitle">Seguimiento de recorrido con consentimiento, foto y términos.</p>
     </div>
     <div class="steps">
       <div class="steps-title">CÓMO FUNCIONA:</div>
       <div class="step"><span class="step-num">1</span>Creás una solicitud y copiás el link</div>
-      <div class="step"><span class="step-num">2</span>Enviás el link por WhatsApp</div>
-      <div class="step"><span class="step-num">3</span>La persona acepta y comparte su recorrido</div>
-      <div class="step"><span class="step-num">4</span>Ves el movimiento en vivo en el mapa</div>
+      <div class="step"><span class="step-num">2</span>La persona acepta los términos y condiciones</div>
+      <div class="step"><span class="step-num">3</span>Comparte su recorrido en tiempo real</div>
+      <div class="step"><span class="step-num">4</span>Saca una foto antes de finalizar</div>
     </div>
     <button class="btn-primary" onclick="createSession()">Crear solicitud de recorrido</button>
-    <div class="footer">🔒 Transparente · Con consentimiento · La persona puede frenar cuando quiera</div>
+    <button class="btn-sm" style="width:100%;margin-top:12px" onclick="showHistory()">📋 Ver historial de sesiones</button>
+    <div class="footer">🔒 Transparente · Con T&C · Foto con consentimiento</div>
   </div>
 
-  <!-- Session Panel -->
+  <!-- Active Session -->
   <div id="session" class="hidden">
     <div class="header-row">
-      <h1>📍 Tu panel</h1>
-      <button class="btn-secondary" style="width:auto;padding:8px 14px;margin:0" onclick="resetSession()">↻ Nueva</button>
+      <h1>📍 Sesión activa</h1>
+      <div>
+        <button class="btn-sm" onclick="showHistory()">📋 Historial</button>
+        <button class="btn-sm" onclick="resetView()">↻ Nueva</button>
+      </div>
     </div>
 
     <div class="share-box">
       <div class="share-label">LINK PARA COMPARTIR:</div>
       <div class="share-link" id="shareLink">—</div>
-      <div class="share-hint">📱 Copiá este link y envialo por WhatsApp. La persona verá que es seguimiento continuo.</div>
+      <div class="share-hint">📱 La persona verá los términos, aceptará, y compartirá recorrido + foto.</div>
       <button class="btn-copy" id="copyBtn" onclick="copyLink()">📋 Copiar link</button>
     </div>
 
-    <!-- Status -->
     <div id="statusBar" class="status-bar waiting">
-      <div class="pulse waiting"></div>
-      <span>Esperando que la persona acepte...</span>
+      <div class="pulse waiting"></div><span>Esperando que la persona abra el link...</span>
     </div>
 
-    <!-- Stats -->
     <div id="statsSection" class="hidden">
       <div class="stats-grid">
-        <div class="stat-box">
-          <div class="stat-value" id="statPoints">0</div>
-          <div class="stat-label">PUNTOS</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-value" id="statDistance">0</div>
-          <div class="stat-label">METROS</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-value" id="statTime">0m</div>
-          <div class="stat-label">TIEMPO</div>
+        <div class="stat-box"><div class="stat-value" id="statPoints">0</div><div class="stat-label">PUNTOS</div></div>
+        <div class="stat-box"><div class="stat-value" id="statDistance">0</div><div class="stat-label">METROS</div></div>
+        <div class="stat-box"><div class="stat-value" id="statTime">0m</div><div class="stat-label">TIEMPO</div></div>
+      </div>
+      <div id="map"></div>
+      <a id="mapsLink" href="#" target="_blank" rel="noopener" class="maps-link hidden">🗺 Abrir en Google Maps →</a>
+
+      <div id="photoSection" class="hidden">
+        <div class="photo-box">
+          <div class="share-label">📸 FOTO DEL USUARIO:</div>
+          <img id="photoImg" src="" alt="Foto"/>
+          <div class="photo-time" id="photoTime"></div>
         </div>
       </div>
 
-      <!-- Map -->
-      <div id="map"></div>
+      <div class="share-label" style="margin:12px 0 8px">REGISTRO COMPLETO:</div>
+      <div id="eventLog" style="max-height:200px;overflow-y:auto;border:1px solid rgba(0,0,0,.05);border-radius:12px;margin-bottom:16px"></div>
 
-      <!-- Google Maps link -->
-      <a id="mapsLink" href="#" target="_blank" rel="noopener" class="maps-link hidden">🗺 Abrir última ubicación en Google Maps →</a>
-
-      <!-- Points list -->
-      <div class="share-label" style="margin:12px 0 8px">HISTORIAL DE PUNTOS:</div>
+      <div class="share-label" style="margin:12px 0 8px">PUNTOS DE UBICACIÓN:</div>
       <div class="points-box" id="pointsList"></div>
 
-      <!-- Stop button -->
       <button id="stopBtn" class="btn-stop" onclick="stopTracking()">⬛ Detener seguimiento</button>
     </div>
 
-    <div class="footer">🔒 Seguimiento transparente · La persona puede frenar cuando quiera</div>
+    <div class="footer">🔒 Todo registrado con consentimiento explícito</div>
+  </div>
+
+  <!-- History -->
+  <div id="historyView" class="hidden">
+    <div class="header-row">
+      <h1>📋 Historial</h1>
+      <button class="btn-sm" onclick="resetView()">← Volver</button>
+    </div>
+    <div id="historyList"></div>
+    <div id="historyEmpty" style="text-align:center;padding:40px;color:#8a9a9e;font-size:14px">
+      No hay sesiones todavía
+    </div>
+    <div class="footer">Sesiones se mantienen por 48 horas</div>
+  </div>
+
+  <!-- Session Detail (from history) -->
+  <div id="detailView" class="hidden">
+    <div class="header-row">
+      <h1>📍 Detalle</h1>
+      <button class="btn-sm" onclick="showHistory()">← Historial</button>
+    </div>
+    <div id="detailContent"></div>
   </div>
 </div>
 
 <script>
-let sessionId = null;
-let pollInterval = null;
-let map = null;
-let polyline = null;
-let marker = null;
-let startMarker = null;
-let lastPointCount = 0;
+let sessionId=null,pollInterval=null,map=null,polyline=null,marker=null,startMarker=null,lastPointCount=0;
 
-async function createSession() {
-  try {
-    const res = await fetch('/api/session', { method: 'POST' });
-    const data = await res.json();
-    sessionId = data.id;
-    document.getElementById('shareLink').textContent = window.location.origin + data.url;
-    document.getElementById('landing').classList.add('hidden');
-    document.getElementById('session').classList.remove('hidden');
+function hideAll(){['landing','session','historyView','detailView'].forEach(id=>document.getElementById(id).classList.add('hidden'))}
+
+async function createSession(){
+  try{
+    const res=await fetch('/api/session',{method:'POST'});
+    const data=await res.json();
+    sessionId=data.id;
+    document.getElementById('shareLink').textContent=window.location.origin+data.url;
+    hideAll();document.getElementById('session').classList.remove('hidden');
     startPolling();
-  } catch (e) {
-    alert('Error al crear sesión');
+  }catch(e){alert('Error al crear sesión')}
+}
+
+function startPolling(){if(pollInterval)clearInterval(pollInterval);pollInterval=setInterval(pollSession,3000)}
+
+async function pollSession(){
+  try{
+    const res=await fetch(`/api/session/${sessionId}`);
+    const data=await res.json();
+    if(data.pointCount>0){showStats(data);updateMap(data.points);updatePoints(data.points)}
+    updateStatus(data);
+    if(data.hasPhoto)loadPhoto();
+    updateEventLog(data);
+  }catch(e){}
+}
+
+function updateStatus(data){
+  const bar=document.getElementById('statusBar');
+  if(data.stopped){
+    bar.className='status-bar stopped';bar.innerHTML='<div class="pulse stopped"></div><span>Seguimiento finalizado</span>';
+    document.getElementById('stopBtn').classList.add('hidden');clearInterval(pollInterval);
+  }else if(data.active){
+    bar.className='status-bar active';
+    const t=data.points.length>0?new Date(data.points[data.points.length-1].timestamp).toLocaleTimeString('es-AR'):'';
+    bar.innerHTML=`<div class="pulse active"></div><span>En vivo — Última: ${t}</span>`;
+  }else if(data.termsAcceptedAt){
+    bar.className='status-bar active';
+    bar.innerHTML='<div class="pulse active"></div><span>✅ Términos aceptados — esperando GPS...</span>';
+  }else if(data.openedAt){
+    bar.className='status-bar active';
+    const t=new Date(data.openedAt).toLocaleTimeString('es-AR');
+    bar.innerHTML=`<div class="pulse active"></div><span>📱 Link abierto a las ${t} — leyendo términos...</span>`;
   }
 }
 
-function startPolling() {
-  if (pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(pollSession, 3000);
+function updateEventLog(data){
+  const el=document.getElementById('eventLog');
+  let html='';
+  const row=(icon,text,time)=>`<div class="point-row"><div style="display:flex;align-items:center;gap:8px"><span>${icon}</span><span style="color:#3a4a4e;font-size:12px">${text}</span></div><span class="point-time">${time||''}</span></div>`;
+  if(data.createdAt)html+=row('🔗','Sesión creada',new Date(data.createdAt).toLocaleTimeString('es-AR'));
+  if(data.openedAt)html+=row('📱','Link abierto',new Date(data.openedAt).toLocaleTimeString('es-AR'));
+  if(data.termsAcceptedAt)html+=row('✅','Términos aceptados',new Date(data.termsAcceptedAt).toLocaleTimeString('es-AR'));
+  if(data.pointCount>0)html+=row('📍',`Tracking iniciado (${data.pointCount} puntos)`,new Date(data.points[0].timestamp).toLocaleTimeString('es-AR'));
+  if(data.hasPhoto)html+=row('📸','Foto enviada',data.photoAt?new Date(data.photoAt).toLocaleTimeString('es-AR'):'');
+  if(data.stopped)html+=row('⬛','Seguimiento finalizado','');
+  el.innerHTML=html;
 }
 
-async function pollSession() {
-  try {
-    const res = await fetch(`/api/session/${sessionId}`);
-    const data = await res.json();
-
-    if (data.pointCount > 0) {
-      showStats(data);
-      updateMap(data.points);
-      updatePointsList(data.points);
-    }
-
-    // Update status bar
-    const bar = document.getElementById('statusBar');
-    if (data.stopped) {
-      bar.className = 'status-bar stopped';
-      bar.innerHTML = '<div class="pulse stopped"></div><span>Seguimiento finalizado</span>';
-      document.getElementById('stopBtn').classList.add('hidden');
-      clearInterval(pollInterval);
-    } else if (data.active) {
-      bar.className = 'status-bar active';
-      const lastTime = data.points.length > 0 ? new Date(data.points[data.points.length-1].timestamp).toLocaleTimeString('es-AR') : '';
-      bar.innerHTML = `<div class="pulse active"></div><span>En vivo — Última actualización: ${lastTime}</span>`;
-    } else if (data.openedAt) {
-      bar.className = 'status-bar active';
-      const openTime = new Date(data.openedAt).toLocaleTimeString('es-AR');
-      bar.innerHTML = `<div class="pulse active"></div><span>📱 Link abierto a las ${openTime} — esperando que acepte...</span>`;
-    }
-  } catch (e) {}
-}
-
-function showStats(data) {
+function showStats(data){
   document.getElementById('statsSection').classList.remove('hidden');
-  document.getElementById('statPoints').textContent = data.pointCount;
-
-  // Distance
-  let totalDist = 0;
-  for (let i = 1; i < data.points.length; i++) {
-    totalDist += haversine(data.points[i-1], data.points[i]);
+  document.getElementById('statPoints').textContent=data.pointCount;
+  let dist=0;
+  for(let i=1;i<data.points.length;i++)dist+=haversine(data.points[i-1],data.points[i]);
+  document.getElementById('statDistance').textContent=dist>1000?(dist/1000).toFixed(1)+'k':Math.round(dist);
+  if(data.points.length>=2){
+    const mins=Math.round((new Date(data.points[data.points.length-1].timestamp)-new Date(data.points[0].timestamp))/60000);
+    document.getElementById('statTime').textContent=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m';
   }
-  if (totalDist > 1000) {
-    document.getElementById('statDistance').textContent = (totalDist/1000).toFixed(1) + 'k';
-  } else {
-    document.getElementById('statDistance').textContent = Math.round(totalDist);
-  }
-
-  // Time
-  if (data.points.length >= 2) {
-    const start = new Date(data.points[0].timestamp);
-    const end = new Date(data.points[data.points.length-1].timestamp);
-    const mins = Math.round((end - start) / 60000);
-    if (mins >= 60) {
-      document.getElementById('statTime').textContent = Math.floor(mins/60) + 'h ' + (mins%60) + 'm';
-    } else {
-      document.getElementById('statTime').textContent = mins + 'm';
-    }
-  }
-
-  // Maps link
-  const last = data.points[data.points.length - 1];
-  const mapsLink = document.getElementById('mapsLink');
-  mapsLink.href = `https://www.google.com/maps?q=${last.lat},${last.lng}`;
-  mapsLink.classList.remove('hidden');
+  const last=data.points[data.points.length-1];
+  const ml=document.getElementById('mapsLink');ml.href=`https://www.google.com/maps?q=${last.lat},${last.lng}`;ml.classList.remove('hidden');
 }
 
-function updateMap(points) {
-  if (!map) {
-    map = L.map('map').setView([points[0].lat, points[0].lng], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap'
-    }).addTo(map);
-    polyline = L.polyline([], { color: '#1a6b52', weight: 4, opacity: 0.8 }).addTo(map);
-
-    // Start marker
-    startMarker = L.circleMarker([points[0].lat, points[0].lng], {
-      radius: 8, fillColor: '#2d8a6e', fillOpacity: 1, color: '#fff', weight: 2
-    }).addTo(map).bindPopup('📍 Inicio');
+function updateMap(points){
+  if(!map){
+    map=L.map('map').setView([points[0].lat,points[0].lng],15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+    polyline=L.polyline([],{color:'#1a6b52',weight:4,opacity:.8}).addTo(map);
+    startMarker=L.circleMarker([points[0].lat,points[0].lng],{radius:8,fillColor:'#2d8a6e',fillOpacity:1,color:'#fff',weight:2}).addTo(map).bindPopup('📍 Inicio');
   }
-
-  if (points.length > lastPointCount) {
-    const latlngs = points.map(p => [p.lat, p.lng]);
-    polyline.setLatLngs(latlngs);
-
-    const last = points[points.length - 1];
-
-    // Current position marker
-    if (marker) map.removeLayer(marker);
-    marker = L.circleMarker([last.lat, last.lng], {
-      radius: 10, fillColor: '#dc3c3c', fillOpacity: 1, color: '#fff', weight: 3
-    }).addTo(map).bindPopup('📍 Posición actual');
-
-    map.setView([last.lat, last.lng], map.getZoom());
-    lastPointCount = points.length;
+  if(points.length>lastPointCount){
+    polyline.setLatLngs(points.map(p=>[p.lat,p.lng]));
+    const last=points[points.length-1];
+    if(marker)map.removeLayer(marker);
+    marker=L.circleMarker([last.lat,last.lng],{radius:10,fillColor:'#dc3c3c',fillOpacity:1,color:'#fff',weight:3}).addTo(map).bindPopup('📍 Actual');
+    map.setView([last.lat,last.lng],map.getZoom());lastPointCount=points.length;
   }
 }
 
-function updatePointsList(points) {
-  const container = document.getElementById('pointsList');
-  container.innerHTML = points.slice().reverse().map((p, i) => {
-    const idx = points.length - i;
-    const time = new Date(p.timestamp).toLocaleTimeString('es-AR');
-    return `<div class="point-row">
-      <div style="display:flex;align-items:center">
-        <div class="point-idx">${idx}</div>
-        <span class="point-coords">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</span>
-      </div>
-      <span class="point-time">${time}</span>
-    </div>`;
+function updatePoints(points){
+  document.getElementById('pointsList').innerHTML=points.slice().reverse().map((p,i)=>{
+    const idx=points.length-i;const t=new Date(p.timestamp).toLocaleTimeString('es-AR');
+    return`<div class="point-row"><div style="display:flex;align-items:center"><div class="point-idx">${idx}</div><span class="point-coords">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</span></div><span class="point-time">${t}</span></div>`;
   }).join('');
 }
 
-function haversine(a, b) {
-  const R = 6371000;
-  const toRad = d => d * Math.PI / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const x = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+async function loadPhoto(){
+  try{
+    const res=await fetch(`/api/photo/${sessionId}`);
+    if(!res.ok)return;
+    const data=await res.json();
+    document.getElementById('photoSection').classList.remove('hidden');
+    document.getElementById('photoImg').src=data.photo;
+    document.getElementById('photoTime').textContent='Tomada: '+new Date(data.photoAt).toLocaleString('es-AR');
+  }catch(e){}
 }
 
-async function stopTracking() {
-  if (!confirm('¿Detener el seguimiento?')) return;
-  try {
-    await fetch(`/api/stop/${sessionId}`, { method: 'POST' });
-    pollSession();
-  } catch (e) {}
+function haversine(a,b){const R=6371000,r=d=>d*Math.PI/180,dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng),x=Math.sin(dLat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
+
+async function stopTracking(){if(!confirm('¿Detener el seguimiento?'))return;try{await fetch(`/api/stop/${sessionId}`,{method:'POST'});pollSession()}catch(e){}}
+
+function copyLink(){
+  const link=document.getElementById('shareLink').textContent;const btn=document.getElementById('copyBtn');
+  navigator.clipboard.writeText(link).then(()=>{btn.textContent='✓ Copiado!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='📋 Copiar link';btn.classList.remove('copied')},2000)});
 }
 
-function copyLink() {
-  const link = document.getElementById('shareLink').textContent;
-  const btn = document.getElementById('copyBtn');
-  navigator.clipboard.writeText(link).then(() => {
-    btn.textContent = '✓ Copiado!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '📋 Copiar link'; btn.classList.remove('copied'); }, 2000);
-  });
+// History
+async function showHistory(){
+  hideAll();document.getElementById('historyView').classList.remove('hidden');
+  try{
+    const res=await fetch('/api/sessions');const list=await res.json();
+    if(list.length===0){document.getElementById('historyEmpty').classList.remove('hidden');document.getElementById('historyList').innerHTML='';return}
+    document.getElementById('historyEmpty').classList.add('hidden');
+    document.getElementById('historyList').innerHTML=list.map(s=>{
+      const date=new Date(s.createdAt).toLocaleString('es-AR');
+      const badge=s.stopped?'<span class="history-badge badge-stopped">FINALIZADA</span>':s.active?'<span class="history-badge badge-active">EN VIVO</span>':'<span class="history-badge badge-waiting">ESPERANDO</span>';
+      const photoThumb=s.hasPhoto?`<div style="font-size:11px;color:#2d8a6e;margin-top:4px">📸 Tiene foto</div>`:'';
+      return`<div class="history-item" onclick="viewDetail('${s.id}')">
+        <div class="history-header"><span class="history-id">#${s.id}</span>${badge}</div>
+        <div class="history-details">
+          📅 ${date}<br>
+          📍 ${s.pointCount} puntos registrados
+          ${s.openedAt?'<br>📱 Link abierto: '+new Date(s.openedAt).toLocaleTimeString('es-AR'):''}
+          ${s.termsAcceptedAt?'<br>✅ T&C aceptados: '+new Date(s.termsAcceptedAt).toLocaleTimeString('es-AR'):''}
+          ${photoThumb}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){document.getElementById('historyList').innerHTML='<p style="color:#c04040;padding:20px">Error al cargar historial</p>'}
 }
 
-function resetSession() {
-  if (pollInterval) clearInterval(pollInterval);
-  sessionId = null; map = null; polyline = null; marker = null; startMarker = null; lastPointCount = 0;
-  document.getElementById('landing').classList.remove('hidden');
-  document.getElementById('session').classList.add('hidden');
+async function viewDetail(id){
+  hideAll();document.getElementById('detailView').classList.remove('hidden');
+  try{
+    const res=await fetch(`/api/session/${id}`);const data=await res.json();
+    let html=`<div class="status-bar ${data.stopped?'stopped':data.active?'active':'waiting'}"><div class="pulse ${data.stopped?'stopped':data.active?'active':'waiting'}"></div><span>${data.stopped?'Finalizada':data.active?'En vivo':'Esperando'}</span></div>`;
+
+    // Event log
+    html+='<div class="share-label" style="margin-bottom:8px">REGISTRO DE EVENTOS:</div><div style="border:1px solid rgba(0,0,0,.05);border-radius:12px;margin-bottom:16px">';
+    const row=(icon,text,time)=>`<div class="point-row"><div style="display:flex;align-items:center;gap:8px"><span>${icon}</span><span style="font-size:12px">${text}</span></div><span class="point-time">${time}</span></div>`;
+    html+=row('🔗','Sesión creada',new Date(data.createdAt).toLocaleTimeString('es-AR'));
+    if(data.openedAt)html+=row('📱','Link abierto',new Date(data.openedAt).toLocaleTimeString('es-AR'));
+    if(data.termsAcceptedAt)html+=row('✅','T&C aceptados',new Date(data.termsAcceptedAt).toLocaleTimeString('es-AR'));
+    if(data.pointCount>0)html+=row('📍',data.pointCount+' puntos','');
+    if(data.hasPhoto)html+=row('📸','Foto enviada',data.photoAt?new Date(data.photoAt).toLocaleTimeString('es-AR'):'');
+    if(data.stopped)html+=row('⬛','Finalizada','');
+    html+='</div>';
+
+    // Photo
+    if(data.hasPhoto){
+      try{
+        const pRes=await fetch(`/api/photo/${id}`);const pData=await pRes.json();
+        html+=`<div class="photo-box"><div class="share-label">📸 FOTO:</div><img src="${pData.photo}" style="max-width:100%;max-height:300px;border-radius:10px;border:2px solid rgba(45,138,110,.2)"/><div class="photo-time">Tomada: ${new Date(pData.photoAt).toLocaleString('es-AR')}</div></div>`;
+      }catch(e){}
+    }
+
+    // Points
+    if(data.pointCount>0){
+      html+='<div class="share-label" style="margin:12px 0 8px">PUNTOS:</div><div class="points-box">';
+      data.points.forEach((p,i)=>{
+        html+=`<div class="point-row"><div style="display:flex;align-items:center"><div class="point-idx">${i+1}</div><span class="point-coords">${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}</span></div><span class="point-time">${new Date(p.timestamp).toLocaleTimeString('es-AR')}</span></div>`;
+      });
+      html+='</div>';
+      const last=data.points[data.points.length-1];
+      html+=`<a href="https://www.google.com/maps?q=${last.lat},${last.lng}" target="_blank" class="maps-link">🗺 Abrir en Google Maps →</a>`;
+    }
+
+    document.getElementById('detailContent').innerHTML=html;
+  }catch(e){document.getElementById('detailContent').innerHTML='<p style="color:#c04040">Error al cargar detalle</p>'}
+}
+
+function resetView(){
+  if(pollInterval)clearInterval(pollInterval);
+  sessionId=null;map=null;polyline=null;marker=null;startMarker=null;lastPointCount=0;
+  hideAll();document.getElementById('landing').classList.remove('hidden');
   document.getElementById('statsSection').classList.add('hidden');
-  document.getElementById('statusBar').className = 'status-bar waiting';
-  document.getElementById('statusBar').innerHTML = '<div class="pulse waiting"></div><span>Esperando que la persona acepte...</span>';
+  document.getElementById('photoSection').classList.add('hidden');
+  document.getElementById('statusBar').className='status-bar waiting';
+  document.getElementById('statusBar').innerHTML='<div class="pulse waiting"></div><span>Esperando...</span>';
   document.getElementById('stopBtn').classList.remove('hidden');
-  // Reset map container
-  document.getElementById('map').innerHTML = '';
-  document.getElementById('map').classList.remove('leaflet-container');
+  document.getElementById('map').innerHTML='';
+  const m=document.getElementById('map');if(m._leaflet_id)m._leaflet_id=null;
 }
 </script>
 </body>
