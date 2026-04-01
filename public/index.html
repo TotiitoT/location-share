@@ -371,6 +371,8 @@ function closeDetail(){
 }
 
 async function createSession(){
+  const btn=document.querySelector('.btn-green');
+  btn.textContent='Creando...';btn.disabled=true;
   try{
     const res=await fetch('/api/session',{method:'POST'});
     const data=await res.json();
@@ -378,7 +380,8 @@ async function createSession(){
     document.getElementById('modalLink').textContent=link;
     document.getElementById('newModal').style.display='flex';
     pollAll();
-  }catch(e){alert('Error')}
+  }catch(e){alert('Error al conectar. El servidor puede estar iniciando, esperá 30 seg y probá de nuevo.')}
+  btn.textContent='+ Nueva solicitud';btn.disabled=false;
 }
 
 function copyModalLink(){
@@ -416,4 +419,5 @@ pollInterval=setInterval(pollAll,4000);
 </script>
 </body>
 </html>
+
 
