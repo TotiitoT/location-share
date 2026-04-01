@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Location Share — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#0f1419;color:#e0e0e8;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#161b22;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.topbar-title{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.btn-green{background:#1a6b52;color:#fff}
+.btn-green:hover{background:#15573f}
+.btn-green:disabled{background:#2a3a35;color:#5a6a65;cursor:wait}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,.1);color:#8a9aa0}
+.btn-red{background:#dc3c3c;color:#fff}
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:340px;background:#161b22;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
+.sidebar-title{font-size:12px;font-weight:600;color:#8a9aa0;letter-spacing:.5px}
+.count{font-size:11px;background:rgba(45,138,110,.15);color:#34d399;padding:2px 8px;border-radius:12px;font-weight:600}
+.tabs{display:flex;gap:2px;padding:6px 12px;background:rgba(0,0,0,.15)}
+.tab{flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;background:transparent;color:#6a7a80}
+.tab.active{background:rgba(45,138,110,.12);color:#34d399}
+.slist{flex:1;overflow-y:auto;padding:8px}
+
+/* Link box - shows after creating session */
+.link-box{margin:8px;padding:14px;background:rgba(45,138,110,.08);border:1px solid rgba(45,138,110,.25);border-radius:12px;animation:slideDown .3s ease}
+.link-box-title{font-size:11px;color:#34d399;font-weight:600;margin-bottom:8px}
+.link-box-url{font-family:'JetBrains Mono';font-size:11px;color:#7ee2c0;word-break:break-all;padding:10px;background:rgba(0,0,0,.3);border-radius:8px;margin-bottom:10px;user-select:all;cursor:text;line-height:1.6}
+.link-box-btns{display:flex;gap:6px}
+.link-box-btns .btn{flex:1;font-size:11px;padding:8px}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+.scard{padding:12px;border:1px solid rgba(255,255,255,.05);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:.15s}
+.scard:hover{border-color:rgba(45,138,110,.3);background:rgba(45,138,110,.03)}
+.scard.sel{border-color:rgba(45,138,110,.5);background:rgba(45,138,110,.06)}
+.sid{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:#34d399}
+.smeta{font-size:11px;color:#5a6a70;margin-top:5px;line-height:1.6}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:.3px}
+.b-live{background:rgba(45,138,110,.15);color:#34d399}
+.b-stop{background:rgba(140,140,160,.12);color:#8a8a9e}
+.b-wait{background:rgba(200,180,100,.12);color:#c8a840}
+.b-terms{background:rgba(100,160,255,.12);color:#64a0ff}
+.dot{width:6px;height:6px;border-radius:50%;background:#34d399;animation:blink 1s infinite}
+
+.map-area{flex:1;position:relative}
+#map{width:100%;height:100%}
+
+/* Detail panel */
+.dpanel{position:absolute;top:10px;right:10px;width:320px;max-height:calc(100% - 20px);background:rgba(22,27,34,.95);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow-y:auto;z-index:50}
+.dpanel.hide{display:none}
+.dheader{padding:14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
+.dbody{padding:14px}
+.dclose{width:26px;height:26px;border:none;border-radius:6px;background:rgba(255,255,255,.06);color:#8a9aa0;cursor:pointer;font-size:13px}
+.erow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:12px}
+.erow:last-child{border:none}
+.etime{color:#5a6a70;font-family:'JetBrains Mono';font-size:10px;margin-left:auto;flex-shrink:0}
+.statrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:10px 0}
+.statbox{text-align:center;padding:8px;background:rgba(255,255,255,.03);border-radius:6px}
+.statv{font-size:15px;font-weight:700;font-family:'JetBrains Mono'}
+.statl{font-size:9px;color:#5a6a70;margin-top:2px}
+.coordbox{font-family:'JetBrains Mono';font-size:11px;color:#7a8a8e;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:6px;margin:6px 0}
+.gmaps{display:block;text-align:center;padding:8px;background:rgba(45,138,110,.08);border-radius:8px;color:#34d399;font-size:12px;font-weight:600;text-decoration:none;margin:8px 0}
+.phthumb{width:100%;border-radius:8px;margin:8px 0;cursor:pointer}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;color:#3a4a50;text-align:center}
+.empty p{font-size:13px;margin-top:8px}
+
+@media(max-width:768px){.sidebar{width:100%;max-height:40%}.main{flex-direction:column}.dpanel{width:calc(100% - 20px);left:10px}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+.leaflet-container{background:#0d1117}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-title"><span style="font-size:20px">📍</span> Location Share</div>
+  <button class="btn btn-green" id="newBtn" onclick="crearSesion()">+ Nueva solicitud</button>
+</div>
+<div class="main">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">SESIONES</span>
+      <span class="count" id="cnt">0</span>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="filtrar('all',this)">Todas</button>
+      <button class="tab" onclick="filtrar('live',this)">En vivo</button>
+      <button class="tab" onclick="filtrar('stopped',this)">Finalizadas</button>
+      <button class="tab" onclick="filtrar('waiting',this)">Esperando</button>
+    </div>
+    <div class="slist" id="slist">
+      <div class="empty" id="emptyMsg"><div style="font-size:32px;opacity:.3">📡</div><p>No hay sesiones.<br>Creá una para empezar.</p></div>
+    </div>
+  </div>
+  <div class="map-area">
+    <div id="map"></div>
+    <div class="dpanel hide" id="dpanel">
+      <div class="dheader">
+        <div><span class="sid" id="did"></span> <span class="badge" id="dbadge"></span></div>
+        <button class="dclose" onclick="cerrarDetalle()">✕</button>
+      </div>
+      <div class="dbody" id="dbody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var map,sesiones=[],capas={},selId=null,filtro='all',poll=null,linkBoxId=null;
+var COLS=['#34d399','#64a0ff','#f59e0b','#ef4444','#a78bfa','#ec4899','#06b6d4','#84cc16'];
+
+function initMap(){
+  map=L.map('map').setView([-40.15,-71.35],13);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM © CARTO',maxZoom:19}).addTo(map);
+}
+
+async function crearSesion(){
+  var b=document.getElementById('newBtn');
+  b.textContent='Creando...';b.disabled=true;
+  try{
+    var r=await fetch('/api/session',{method:'POST'});
+    var d=await r.json();
+    linkBoxId=d.id;
+    await cargarTodo();
+  }catch(e){
+    alert('Error. Si es la primera vez, el servidor tarda ~30 seg en despertar. Probá de nuevo.');
+  }
+  b.textContent='+ Nueva solicitud';b.disabled=false;
+}
+
+async function cargarTodo(){
+  try{
+    var r=await fetch('/api/sessions');
+    sesiones=await r.json();
+    renderLista();
+    actualizarMapa();
+    document.getElementById('cnt').textContent=sesiones.length;
+    if(selId){var s=sesiones.find(function(x){return x.id===selId});if(s)verDetalle(selId);}
+  }catch(e){}
+}
+
+function renderLista(){
+  var c=document.getElementById('slist');
+  var em=document.getElementById('emptyMsg');
+  var f=sesiones.filter(function(s){
+    if(filtro==='live')return s.active;
+    if(filtro==='stopped')return s.stopped;
+    if(filtro==='waiting')return !s.active&&!s.stopped;
+    return true;
+  });
+  if(f.length===0){c.innerHTML='';c.appendChild(em);em.style.display='flex';return;}
+  em.style.display='none';
+  var html='';
+
+  // Show link box for newly created session
+  if(linkBoxId){
+    var lnk=window.location.origin+'/s/'+linkBoxId;
+    html+='<div class="link-box">';
+    html+='<div class="link-box-title">📍 NUEVA SOLICITUD CREADA</div>';
+    html+='<div class="link-box-url" id="linkUrl">'+lnk+'</div>';
+    html+='<div class="link-box-btns">';
+    html+='<button class="btn btn-green" onclick="copiarLink()">📋 Copiar link</button>';
+    html+='<button class="btn btn-outline" onclick="cerrarLinkBox()">✕ Cerrar</button>';
+    html+='</div></div>';
+  }
+
+  for(var i=0;i<f.length;i++){
+    var s=f[i];
+    var col=COLS[i%COLS.length];
+    var badge;
+    if(s.stopped)badge='<span class="badge b-stop">FINALIZADA</span>';
+    else if(s.active)badge='<span class="badge b-live"><span class="dot"></span>EN VIVO</span>';
+    else if(s.termsAcceptedAt)badge='<span class="badge b-terms">T&C OK</span>';
+    else if(s.openedAt)badge='<span class="badge b-wait">ABIERTO</span>';
+    else badge='<span class="badge b-wait">ESPERANDO</span>';
+
+    var time=new Date(s.createdAt).toLocaleString('es-AR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+    var coord=s.lastPoint?s.lastPoint.lat.toFixed(4)+', '+s.lastPoint.lng.toFixed(4):'Sin ubicación';
+    html+='<div class="scard'+(selId===s.id?' sel':'')+'" onclick="seleccionar(\''+s.id+'\')" style="border-left:3px solid '+col+'">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center"><span class="sid">#'+s.id+'</span>'+badge+'</div>';
+    html+='<div class="smeta">📅 '+time+' · 📍 '+s.pointCount+' pts'+(s.hasPhoto?' · 📸':'')+'<br><span style="font-family:JetBrains Mono;font-size:10px;color:#3a4a50">'+coord+'</span></div>';
+    html+='</div>';
+  }
+  c.innerHTML=html;
+}
+
+function copiarLink(){
+  var el=document.getElementById('linkUrl');
+  if(el){
+    navigator.clipboard.writeText(el.textContent).then(function(){
+      el.style.background='rgba(45,138,110,.2)';
+      setTimeout(function(){el.style.background='rgba(0,0,0,.3)';},1500);
+    });
+  }
+}
+
+function cerrarLinkBox(){linkBoxId=null;renderLista();}
+
+function actualizarMapa(){
+  for(var i=0;i<sesiones.length;i++){
+    var s=sesiones[i];
+    var col=COLS[i%COLS.length];
+    if(!capas[s.id])capas[s.id]={mk:null,pulse:null,pl:null,start:null,cnt:0};
+    var L2=capas[s.id];
+    if(s.pointCount>0&&s.lastPoint){
+      if(!L2.mk){
+        L2.mk=L.circleMarker([s.lastPoint.lat,s.lastPoint.lng],{radius:s.active?10:7,fillColor:col,fillOpacity:1,color:'#fff',weight:2}).addTo(map);
+        L2.mk.bindPopup('<b>#'+s.id+'</b><br>'+(s.active?'🟢 En vivo':'⬛ Fin')+'<br>📍 '+s.pointCount+' pts');
+        L2.mk.on('click',function(id){return function(){seleccionar(id);};}(s.id));
+      }else{
+        L2.mk.setLatLng([s.lastPoint.lat,s.lastPoint.lng]);
+        L2.mk.setStyle({radius:s.active?10:7,fillColor:col});
+        L2.mk.setPopupContent('<b>#'+s.id+'</b><br>'+(s.active?'🟢 En vivo':'⬛ Fin')+'<br>📍 '+s.pointCount+' pts');
+      }
+      if(s.active&&!L2.pulse){
+        L2.pulse=L.circleMarker([s.lastPoint.lat,s.lastPoint.lng],{radius:18,fillColor:col,fillOpacity:.12,color:col,weight:1,opacity:.2}).addTo(map);
+      }else if(s.active&&L2.pulse){L2.pulse.setLatLng([s.lastPoint.lat,s.lastPoint.lng]);}
+      else if(!s.active&&L2.pulse){map.removeLayer(L2.pulse);L2.pulse=null;}
+    }
+  }
+}
+
+async function seleccionar(id){
+  selId=id;renderLista();
+  try{
+    var r=await fetch('/api/session/'+id);
+    var d=await r.json();
+    var idx=sesiones.findIndex(function(x){return x.id===id;});
+    var col=COLS[idx%COLS.length];
+    var L2=capas[id];
+    if(L2&&L2.pl){map.removeLayer(L2.pl);L2.pl=null;}
+    if(L2&&L2.start){map.removeLayer(L2.start);L2.start=null;}
+    if(d.points.length>0){
+      var ll=d.points.map(function(p){return[p.lat,p.lng];});
+      L2.pl=L.polyline(ll,{color:col,weight:3,opacity:.7}).addTo(map);
+      L2.start=L.circleMarker([d.points[0].lat,d.points[0].lng],{radius:5,fillColor:'#fff',fillOpacity:1,color:col,weight:2}).addTo(map);
+      map.fitBounds(L2.pl.getBounds(),{padding:[50,50]});
+    }
+    mostrarDetalle(d,id);
+  }catch(e){}
+}
+
+function mostrarDetalle(d,id){
+  document.getElementById('dpanel').classList.remove('hide');
+  document.getElementById('did').textContent='#'+id;
+  var bg=document.getElementById('dbadge');
+  if(d.stopped){bg.className='badge b-stop';bg.textContent='FINALIZADA';}
+  else if(d.active){bg.className='badge b-live';bg.innerHTML='<span class="dot"></span>EN VIVO';}
+  else{bg.className='badge b-wait';bg.textContent='ESPERANDO';}
+
+  var h='';
+  if(d.pointCount>0){
+    var dist=0;
+    for(var i=1;i<d.points.length;i++)dist+=hav(d.points[i-1],d.points[i]);
+    var ds=dist>1000?(dist/1000).toFixed(1)+' km':Math.round(dist)+' m';
+    var ts='—';
+    if(d.points.length>=2){
+      var mins=Math.round((new Date(d.points[d.points.length-1].timestamp)-new Date(d.points[0].timestamp))/60000);
+      ts=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m';
+    }
+    h+='<div class="statrow"><div class="statbox"><div class="statv">'+d.pointCount+'</div><div class="statl">PUNTOS</div></div><div class="statbox"><div class="statv">'+ds+'</div><div class="statl">DISTANCIA</div></div><div class="statbox"><div class="statv">'+ts+'</div><div class="statl">TIEMPO</div></div></div>';
+    var last=d.points[d.points.length-1];
+    h+='<div class="coordbox">📍 '+last.lat.toFixed(6)+', '+last.lng.toFixed(6)+'</div>';
+    h+='<a class="gmaps" href="https://www.google.com/maps?q='+last.lat+','+last.lng+'" target="_blank">🗺 Google Maps →</a>';
+  }
+  if(d.hasPhoto){
+    (async function(){
+      try{var r=await fetch('/api/photo/'+id);var p=await r.json();
+      var img=document.createElement('img');img.src=p.photo;img.className='phthumb';img.onclick=function(){window.open(p.photo)};
+      var ph=document.getElementById('photoArea');if(ph)ph.appendChild(img);
+      }catch(e){}
+    })();
+    h+='<div id="photoArea" style="font-size:11px;color:#5a6a70">📸 Foto:</div>';
+  }
+  h+='<div style="font-size:10px;color:#5a6a70;font-weight:600;margin:12px 0 6px">REGISTRO:</div>';
+  function ev(ic,tx,tm){return '<div class="erow"><span>'+ic+'</span><span style="color:#a0a8ac">'+tx+'</span><span class="etime">'+(tm||'')+'</span></div>';}
+  h+=ev('🔗','Creada',new Date(d.createdAt).toLocaleTimeString('es-AR'));
+  if(d.openedAt)h+=ev('📱','Link abierto',new Date(d.openedAt).toLocaleTimeString('es-AR'));
+  if(d.termsAcceptedAt)h+=ev('✅','T&C aceptados',new Date(d.termsAcceptedAt).toLocaleTimeString('es-AR'));
+  if(d.pointCount>0)h+=ev('📍',d.pointCount+' puntos',new Date(d.points[0].timestamp).toLocaleTimeString('es-AR'));
+  if(d.hasPhoto)h+=ev('📸','Foto','');
+  if(d.stopped)h+=ev('⬛','Finalizada','');
+
+  if(d.active)h+='<button class="btn btn-red" style="width:100%;margin-top:10px" onclick="pararSesion(\''+id+'\')">⬛ Detener</button>';
+  h+='<button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="navigator.clipboard.writeText(window.location.origin+\'/s/'+id+'\')">📋 Copiar link</button>';
+
+  document.getElementById('dbody').innerHTML=h;
+}
+
+function cerrarDetalle(){
+  document.getElementById('dpanel').classList.add('hide');
+  selId=null;renderLista();
+  for(var id in capas){
+    if(capas[id].pl){map.removeLayer(capas[id].pl);capas[id].pl=null;}
+    if(capas[id].start){map.removeLayer(capas[id].start);capas[id].start=null;}
+  }
+}
+
+async function pararSesion(id){
+  if(!confirm('¿Detener?'))return;
+  await fetch('/api/stop/'+id,{method:'POST'});
+  cargarTodo();
+}
+
+function filtrar(f,btn){
+  filtro=f;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  renderLista();
+}
+
+function hav(a,b){var R=6371000,r=function(d){return d*Math.PI/180;},dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng),x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)*Math.sin(dLng/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+
+initMap();
+cargarTodo();
+poll=setInterval(cargarTodo,4000);
+</script>
+</body>
+</html>
