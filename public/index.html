@@ -148,21 +148,20 @@ body{font-family:'DM Sans',-apple-system,sans-serif;background:#0f1419;color:#e0
   </div>
 </div>
 
-<!-- New session modal -->
-<div id="newModal" style="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;display:none">
-  <div style="background:#1c2128;border-radius:16px;padding:28px;max-width:420px;width:90%;border:1px solid rgba(255,255,255,.08)">
-    <h2 style="font-size:18px;margin-bottom:16px;color:#e0e0e8">📍 Nueva solicitud creada</h2>
-    <div style="padding:14px;background:rgba(45,138,110,.06);border:1px solid rgba(45,138,110,.15);border-radius:10px;margin-bottom:14px">
-      <div style="font-size:11px;color:#6a7a80;margin-bottom:6px;font-weight:600;letter-spacing:.5px">LINK PARA COMPARTIR:</div>
-      <div id="modalLink" style="font-family:'JetBrains Mono';font-size:13px;color:#34d399;word-break:break-all;user-select:all"></div>
-    </div>
-    <div style="font-size:12px;color:#6a7a80;margin-bottom:16px">📱 Copiá este link y envialo por WhatsApp</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-green" style="flex:1" onclick="copyModalLink()">📋 Copiar link</button>
-      <button class="btn btn-outline" style="flex:1" onclick="closeModal()">Cerrar</button>
-    </div>
+<!-- New session banner (replaces modal) -->
+<div id="newBanner" style="display:none;position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:300;background:#1c2128;border:1px solid rgba(45,138,110,.3);border-radius:16px;padding:24px;width:90%;max-width:440px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
+  <h2 style="font-size:16px;margin-bottom:14px;color:#e0e0e8">📍 Nueva solicitud creada</h2>
+  <div style="padding:12px;background:rgba(45,138,110,.06);border:1px solid rgba(45,138,110,.15);border-radius:10px;margin-bottom:12px">
+    <div style="font-size:10px;color:#6a7a80;margin-bottom:4px;font-weight:600;letter-spacing:.5px">LINK PARA COMPARTIR:</div>
+    <div id="bannerLink" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#34d399;word-break:break-all;user-select:all"></div>
+  </div>
+  <div style="font-size:11px;color:#6a7a80;margin-bottom:14px">📱 Copiá este link y envialo por WhatsApp</div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-green" style="flex:1" onclick="copyBannerLink()">📋 Copiar link</button>
+    <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('newBanner').style.display='none'">Cerrar</button>
   </div>
 </div>
+<div id="overlay" onclick="document.getElementById('newBanner').style.display='none';this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:250"></div>
 
 <script>
 let map, allSessions=[], sessionLayers={}, selectedSession=null, filter='all', pollInterval=null;
@@ -377,21 +376,21 @@ async function createSession(){
     const res=await fetch('/api/session',{method:'POST'});
     const data=await res.json();
     const link=window.location.origin+data.url;
-    document.getElementById('modalLink').textContent=link;
-    document.getElementById('newModal').style.display='flex';
+    document.getElementById('bannerLink').textContent=link;
+    document.getElementById('overlay').style.display='block';
+    document.getElementById('newBanner').style.display='block';
     pollAll();
   }catch(e){alert('El servidor puede estar iniciando. Esperá 30 seg y probá de nuevo.')}
   btn.textContent='+ Nueva solicitud';btn.disabled=false;
 }
 
-function copyModalLink(){
-  const link=document.getElementById('modalLink').textContent;
-  navigator.clipboard.writeText(link);
-  event.target.textContent='✓ Copiado!';
-  setTimeout(()=>event.target.textContent='📋 Copiar link',2000);
+function copyBannerLink(){
+  const link=document.getElementById('bannerLink').textContent;
+  navigator.clipboard.writeText(link).then(()=>{
+    event.target.textContent='✓ Copiado!';
+    setTimeout(()=>event.target.textContent='📋 Copiar link',2000);
+  });
 }
-
-function closeModal(){document.getElementById('newModal').style.display='none'}
 
 function copySessionLink(id){
   navigator.clipboard.writeText(window.location.origin+'/s/'+id);
