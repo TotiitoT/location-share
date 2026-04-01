@@ -8,413 +8,316 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',-apple-system,sans-serif;background:#0f1419;color:#e0e0e8;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-
-/* Top Bar */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#161b22;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;z-index:100}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#0f1419;color:#e0e0e8;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#161b22;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
 .topbar-title{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:700}
-.topbar-title span{font-size:20px}
-.topbar-actions{display:flex;gap:8px}
-.btn{padding:8px 16px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
-.btn-green{background:#1a6b52;color:#fff;box-shadow:0 2px 8px rgba(26,107,82,.3)}
+.btn{padding:8px 16px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.btn-green{background:#1a6b52;color:#fff}
 .btn-green:hover{background:#15573f}
+.btn-green:disabled{background:#2a3a35;color:#5a6a65;cursor:wait}
 .btn-outline{background:transparent;border:1px solid rgba(255,255,255,.1);color:#8a9aa0}
-.btn-outline:hover{border-color:rgba(255,255,255,.2);color:#c0c8cc}
 .btn-red{background:#dc3c3c;color:#fff}
-
-/* Main Layout */
 .main{display:flex;flex:1;overflow:hidden}
-
-/* Sidebar */
-.sidebar{width:340px;background:#161b22;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
-.sidebar-header{padding:16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
-.sidebar-title{font-size:13px;font-weight:600;color:#8a9aa0;letter-spacing:.5px}
-.session-count{font-size:11px;background:rgba(45,138,110,.15);color:#34d399;padding:3px 10px;border-radius:20px;font-weight:600}
-
-.tabs{display:flex;gap:2px;padding:8px 16px;background:rgba(0,0,0,.15)}
-.tab{flex:1;padding:8px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;background:transparent;color:#6a7a80;transition:.2s;letter-spacing:.3px}
+.sidebar{width:340px;background:#161b22;border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
+.sidebar-title{font-size:12px;font-weight:600;color:#8a9aa0;letter-spacing:.5px}
+.count{font-size:11px;background:rgba(45,138,110,.15);color:#34d399;padding:2px 8px;border-radius:12px;font-weight:600}
+.tabs{display:flex;gap:2px;padding:6px 12px;background:rgba(0,0,0,.15)}
+.tab{flex:1;padding:7px;border:none;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;background:transparent;color:#6a7a80}
 .tab.active{background:rgba(45,138,110,.12);color:#34d399}
+.slist{flex:1;overflow-y:auto;padding:8px}
 
-.session-list{flex:1;overflow-y:auto;padding:8px}
-.session-card{padding:14px;border:1px solid rgba(255,255,255,.05);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:.2s;position:relative}
-.session-card:hover{border-color:rgba(45,138,110,.3);background:rgba(45,138,110,.03)}
-.session-card.selected{border-color:rgba(45,138,110,.5);background:rgba(45,138,110,.06)}
-.session-id{font-family:'JetBrains Mono';font-size:12px;font-weight:600;color:#34d399}
-.session-meta{font-size:11px;color:#6a7a80;margin-top:6px;line-height:1.7}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:600;letter-spacing:.3px}
-.badge-live{background:rgba(45,138,110,.15);color:#34d399}
-.badge-live::before{content:'';width:6px;height:6px;border-radius:50%;background:#34d399;animation:blink 1s infinite}
-.badge-stopped{background:rgba(140,140,160,.12);color:#8a8a9e}
-.badge-waiting{background:rgba(200,180,100,.12);color:#c8a840}
-.badge-terms{background:rgba(100,160,255,.12);color:#64a0ff}
+/* Link box - shows after creating session */
+.link-box{margin:8px;padding:14px;background:rgba(45,138,110,.08);border:1px solid rgba(45,138,110,.25);border-radius:12px;animation:slideDown .3s ease}
+.link-box-title{font-size:11px;color:#34d399;font-weight:600;margin-bottom:8px}
+.link-box-url{font-family:'JetBrains Mono';font-size:11px;color:#7ee2c0;word-break:break-all;padding:10px;background:rgba(0,0,0,.3);border-radius:8px;margin-bottom:10px;user-select:all;cursor:text;line-height:1.6}
+.link-box-btns{display:flex;gap:6px}
+.link-box-btns .btn{flex:1;font-size:11px;padding:8px}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 
-/* Map */
-.map-container{flex:1;position:relative}
+.scard{padding:12px;border:1px solid rgba(255,255,255,.05);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:.15s}
+.scard:hover{border-color:rgba(45,138,110,.3);background:rgba(45,138,110,.03)}
+.scard.sel{border-color:rgba(45,138,110,.5);background:rgba(45,138,110,.06)}
+.sid{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:#34d399}
+.smeta{font-size:11px;color:#5a6a70;margin-top:5px;line-height:1.6}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:.3px}
+.b-live{background:rgba(45,138,110,.15);color:#34d399}
+.b-stop{background:rgba(140,140,160,.12);color:#8a8a9e}
+.b-wait{background:rgba(200,180,100,.12);color:#c8a840}
+.b-terms{background:rgba(100,160,255,.12);color:#64a0ff}
+.dot{width:6px;height:6px;border-radius:50%;background:#34d399;animation:blink 1s infinite}
+
+.map-area{flex:1;position:relative}
 #map{width:100%;height:100%}
 
-/* Detail Panel (overlay on map) */
-.detail-panel{position:absolute;top:10px;right:10px;width:320px;max-height:calc(100% - 20px);background:rgba(22,27,34,.95);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;z-index:50;display:none}
-.detail-panel.open{display:flex;flex-direction:column}
-.detail-header{padding:16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
-.detail-close{width:28px;height:28px;border:none;border-radius:6px;background:rgba(255,255,255,.06);color:#8a9aa0;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
-.detail-body{padding:16px;overflow-y:auto;flex:1}
+/* Detail panel */
+.dpanel{position:absolute;top:10px;right:10px;width:320px;max-height:calc(100% - 20px);background:rgba(22,27,34,.95);border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow-y:auto;z-index:50}
+.dpanel.hide{display:none}
+.dheader{padding:14px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center}
+.dbody{padding:14px}
+.dclose{width:26px;height:26px;border:none;border-radius:6px;background:rgba(255,255,255,.06);color:#8a9aa0;cursor:pointer;font-size:13px}
+.erow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:12px}
+.erow:last-child{border:none}
+.etime{color:#5a6a70;font-family:'JetBrains Mono';font-size:10px;margin-left:auto;flex-shrink:0}
+.statrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:10px 0}
+.statbox{text-align:center;padding:8px;background:rgba(255,255,255,.03);border-radius:6px}
+.statv{font-size:15px;font-weight:700;font-family:'JetBrains Mono'}
+.statl{font-size:9px;color:#5a6a70;margin-top:2px}
+.coordbox{font-family:'JetBrains Mono';font-size:11px;color:#7a8a8e;padding:6px 8px;background:rgba(255,255,255,.03);border-radius:6px;margin:6px 0}
+.gmaps{display:block;text-align:center;padding:8px;background:rgba(45,138,110,.08);border-radius:8px;color:#34d399;font-size:12px;font-weight:600;text-decoration:none;margin:8px 0}
+.phthumb{width:100%;border-radius:8px;margin:8px 0;cursor:pointer}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;color:#3a4a50;text-align:center}
+.empty p{font-size:13px;margin-top:8px}
 
-.event-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:12px}
-.event-row:last-child{border-bottom:none}
-.event-icon{font-size:14px;flex-shrink:0}
-.event-text{color:#c0c8cc;flex:1}
-.event-time{color:#6a7a80;font-family:'JetBrains Mono';font-size:10px;flex-shrink:0}
-
-.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:12px 0}
-.stat-item{text-align:center;padding:10px;background:rgba(255,255,255,.03);border-radius:8px}
-.stat-val{font-size:16px;font-weight:700;color:#e0e0e8;font-family:'JetBrains Mono'}
-.stat-lbl{font-size:9px;color:#6a7a80;letter-spacing:.5px;margin-top:2px}
-
-.photo-thumb{width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.08);margin:10px 0;cursor:pointer}
-
-.coords-small{font-family:'JetBrains Mono';font-size:11px;color:#8a9aa0;padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;margin:4px 0}
-
-/* Empty state */
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:#4a5a60;text-align:center}
-.empty-state .icon{font-size:36px;margin-bottom:12px;opacity:.4}
-.empty-state p{font-size:13px;line-height:1.6}
-
-/* Mobile */
-@media(max-width:768px){
-  .sidebar{width:100%;height:45%;border-right:none;border-bottom:1px solid rgba(255,255,255,.06)}
-  .main{flex-direction:column}
-  .detail-panel{width:calc(100% - 20px);top:auto;bottom:10px;right:10px;left:10px;max-height:60%}
-}
-
+@media(max-width:768px){.sidebar{width:100%;max-height:40%}.main{flex-direction:column}.dpanel{width:calc(100% - 20px);left:10px}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
-/* Scrollbar */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
-
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
 .leaflet-container{background:#0d1117}
 </style>
 </head>
 <body>
-
-<!-- Top Bar -->
 <div class="topbar">
-  <div class="topbar-title"><span>📍</span> Location Share</div>
-  <div class="topbar-actions">
-    <button class="btn btn-green" onclick="createSession()">+ Nueva solicitud</button>
-  </div>
+  <div class="topbar-title"><span style="font-size:20px">📍</span> Location Share</div>
+  <button class="btn btn-green" id="newBtn" onclick="crearSesion()">+ Nueva solicitud</button>
 </div>
-
-<!-- Main -->
 <div class="main">
-  <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
       <span class="sidebar-title">SESIONES</span>
-      <span class="session-count" id="sessionCount">0</span>
+      <span class="count" id="cnt">0</span>
     </div>
     <div class="tabs">
-      <button class="tab active" onclick="setFilter('all',this)">Todas</button>
-      <button class="tab" onclick="setFilter('live',this)">En vivo</button>
-      <button class="tab" onclick="setFilter('stopped',this)">Finalizadas</button>
-      <button class="tab" onclick="setFilter('waiting',this)">Esperando</button>
+      <button class="tab active" onclick="filtrar('all',this)">Todas</button>
+      <button class="tab" onclick="filtrar('live',this)">En vivo</button>
+      <button class="tab" onclick="filtrar('stopped',this)">Finalizadas</button>
+      <button class="tab" onclick="filtrar('waiting',this)">Esperando</button>
     </div>
-    <div class="session-list" id="sessionList">
-      <div class="empty-state" id="emptyState">
-        <div class="icon">📡</div>
-        <p>No hay sesiones todavía.<br>Creá una para empezar.</p>
-      </div>
+    <div class="slist" id="slist">
+      <div class="empty" id="emptyMsg"><div style="font-size:32px;opacity:.3">📡</div><p>No hay sesiones.<br>Creá una para empezar.</p></div>
     </div>
   </div>
-
-  <!-- Map -->
-  <div class="map-container">
+  <div class="map-area">
     <div id="map"></div>
-
-    <!-- Detail Panel -->
-    <div class="detail-panel" id="detailPanel">
-      <div class="detail-header">
-        <div>
-          <span class="session-id" id="detailId"></span>
-          <span class="badge" id="detailBadge" style="margin-left:8px"></span>
-        </div>
-        <button class="detail-close" onclick="closeDetail()">✕</button>
+    <div class="dpanel hide" id="dpanel">
+      <div class="dheader">
+        <div><span class="sid" id="did"></span> <span class="badge" id="dbadge"></span></div>
+        <button class="dclose" onclick="cerrarDetalle()">✕</button>
       </div>
-      <div class="detail-body" id="detailBody"></div>
+      <div class="dbody" id="dbody"></div>
     </div>
   </div>
 </div>
-
-<!-- New session banner (replaces modal) -->
-<div id="newBanner" style="display:none;position:fixed;top:50px;left:50%;transform:translateX(-50%);z-index:300;background:#1c2128;border:1px solid rgba(45,138,110,.3);border-radius:16px;padding:24px;width:90%;max-width:440px;box-shadow:0 8px 32px rgba(0,0,0,.5)">
-  <h2 style="font-size:16px;margin-bottom:14px;color:#e0e0e8">📍 Nueva solicitud creada</h2>
-  <div style="padding:12px;background:rgba(45,138,110,.06);border:1px solid rgba(45,138,110,.15);border-radius:10px;margin-bottom:12px">
-    <div style="font-size:10px;color:#6a7a80;margin-bottom:4px;font-weight:600;letter-spacing:.5px">LINK PARA COMPARTIR:</div>
-    <div id="bannerLink" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:#34d399;word-break:break-all;user-select:all"></div>
-  </div>
-  <div style="font-size:11px;color:#6a7a80;margin-bottom:14px">📱 Copiá este link y envialo por WhatsApp</div>
-  <div style="display:flex;gap:8px">
-    <button class="btn btn-green" style="flex:1" onclick="copyBannerLink()">📋 Copiar link</button>
-    <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('newBanner').style.display='none'">Cerrar</button>
-  </div>
-</div>
-<div id="overlay" onclick="document.getElementById('newBanner').style.display='none';this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:250"></div>
 
 <script>
-let map, allSessions=[], sessionLayers={}, selectedSession=null, filter='all', pollInterval=null;
+var map,sesiones=[],capas={},selId=null,filtro='all',poll=null,linkBoxId=null;
+var COLS=['#34d399','#64a0ff','#f59e0b','#ef4444','#a78bfa','#ec4899','#06b6d4','#84cc16'];
 
-const COLORS=['#34d399','#64a0ff','#f59e0b','#ef4444','#a78bfa','#ec4899','#06b6d4','#84cc16'];
-
-// Init map
 function initMap(){
-  map=L.map('map',{zoomControl:true}).setView([-40.15,-71.35],13);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
-    attribution:'© OpenStreetMap © CARTO',maxZoom:19
-  }).addTo(map);
+  map=L.map('map').setView([-40.15,-71.35],13);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OSM © CARTO',maxZoom:19}).addTo(map);
 }
 
-// Poll all sessions
-async function pollAll(){
+async function crearSesion(){
+  var b=document.getElementById('newBtn');
+  b.textContent='Creando...';b.disabled=true;
   try{
-    const res=await fetch('/api/sessions');
-    allSessions=await res.json();
-    renderSessionList();
-    updateMapMarkers();
-    document.getElementById('sessionCount').textContent=allSessions.length;
-    if(selectedSession){
-      const s=allSessions.find(x=>x.id===selectedSession);
-      if(s)updateDetail(s.id);
-    }
+    var r=await fetch('/api/session',{method:'POST'});
+    var d=await r.json();
+    linkBoxId=d.id;
+    await cargarTodo();
+  }catch(e){
+    alert('Error. Si es la primera vez, el servidor tarda ~30 seg en despertar. Probá de nuevo.');
+  }
+  b.textContent='+ Nueva solicitud';b.disabled=false;
+}
+
+async function cargarTodo(){
+  try{
+    var r=await fetch('/api/sessions');
+    sesiones=await r.json();
+    renderLista();
+    actualizarMapa();
+    document.getElementById('cnt').textContent=sesiones.length;
+    if(selId){var s=sesiones.find(function(x){return x.id===selId});if(s)verDetalle(selId);}
   }catch(e){}
 }
 
-function renderSessionList(){
-  const container=document.getElementById('sessionList');
-  const empty=document.getElementById('emptyState');
-  const filtered=allSessions.filter(s=>{
-    if(filter==='live')return s.active;
-    if(filter==='stopped')return s.stopped;
-    if(filter==='waiting')return!s.active&&!s.stopped;
+function renderLista(){
+  var c=document.getElementById('slist');
+  var em=document.getElementById('emptyMsg');
+  var f=sesiones.filter(function(s){
+    if(filtro==='live')return s.active;
+    if(filtro==='stopped')return s.stopped;
+    if(filtro==='waiting')return !s.active&&!s.stopped;
     return true;
   });
-  if(filtered.length===0){empty.style.display='flex';container.innerHTML='';container.appendChild(empty);return}
-  empty.style.display='none';
+  if(f.length===0){c.innerHTML='';c.appendChild(em);em.style.display='flex';return;}
+  em.style.display='none';
+  var html='';
 
-  container.innerHTML=filtered.map((s,i)=>{
-    const color=COLORS[i%COLORS.length];
-    const badge=s.stopped?'<span class="badge badge-stopped">FINALIZADA</span>':s.active?'<span class="badge badge-live">EN VIVO</span>':s.termsAcceptedAt?'<span class="badge badge-terms">T&C ACEPTADOS</span>':s.openedAt?'<span class="badge badge-waiting">LINK ABIERTO</span>':'<span class="badge badge-waiting">ESPERANDO</span>';
-    const time=new Date(s.createdAt).toLocaleString('es-AR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
-    const lastCoord=s.lastPoint?`${s.lastPoint.lat.toFixed(4)}, ${s.lastPoint.lng.toFixed(4)}`:'Sin ubicación';
-    return`<div class="session-card ${selectedSession===s.id?'selected':''}" onclick="selectSession('${s.id}')" style="border-left:3px solid ${color}">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="session-id">#${s.id}</span>${badge}
-      </div>
-      <div class="session-meta">
-        📅 ${time} · 📍 ${s.pointCount} puntos${s.hasPhoto?' · 📸 Foto':''}<br>
-        <span style="font-family:'JetBrains Mono';font-size:10px;color:#4a5a60">${lastCoord}</span>
-      </div>
-    </div>`;
-  }).join('');
+  // Show link box for newly created session
+  if(linkBoxId){
+    var lnk=window.location.origin+'/s/'+linkBoxId;
+    html+='<div class="link-box">';
+    html+='<div class="link-box-title">📍 NUEVA SOLICITUD CREADA</div>';
+    html+='<div class="link-box-url" id="linkUrl">'+lnk+'</div>';
+    html+='<div class="link-box-btns">';
+    html+='<button class="btn btn-green" onclick="copiarLink()">📋 Copiar link</button>';
+    html+='<button class="btn btn-outline" onclick="cerrarLinkBox()">✕ Cerrar</button>';
+    html+='</div></div>';
+  }
+
+  for(var i=0;i<f.length;i++){
+    var s=f[i];
+    var col=COLS[i%COLS.length];
+    var badge;
+    if(s.stopped)badge='<span class="badge b-stop">FINALIZADA</span>';
+    else if(s.active)badge='<span class="badge b-live"><span class="dot"></span>EN VIVO</span>';
+    else if(s.termsAcceptedAt)badge='<span class="badge b-terms">T&C OK</span>';
+    else if(s.openedAt)badge='<span class="badge b-wait">ABIERTO</span>';
+    else badge='<span class="badge b-wait">ESPERANDO</span>';
+
+    var time=new Date(s.createdAt).toLocaleString('es-AR',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+    var coord=s.lastPoint?s.lastPoint.lat.toFixed(4)+', '+s.lastPoint.lng.toFixed(4):'Sin ubicación';
+    html+='<div class="scard'+(selId===s.id?' sel':'')+'" onclick="seleccionar(\''+s.id+'\')" style="border-left:3px solid '+col+'">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center"><span class="sid">#'+s.id+'</span>'+badge+'</div>';
+    html+='<div class="smeta">📅 '+time+' · 📍 '+s.pointCount+' pts'+(s.hasPhoto?' · 📸':'')+'<br><span style="font-family:JetBrains Mono;font-size:10px;color:#3a4a50">'+coord+'</span></div>';
+    html+='</div>';
+  }
+  c.innerHTML=html;
 }
 
-function updateMapMarkers(){
-  allSessions.forEach((s,i)=>{
-    const color=COLORS[i%COLORS.length];
-    if(!sessionLayers[s.id]){
-      sessionLayers[s.id]={polyline:null,marker:null,startMarker:null,lastCount:0};
-    }
-    const layer=sessionLayers[s.id];
-
-    if(s.pointCount>0&&s.lastPoint){
-      const points=[];// We need full points for polyline, fetch if selected
-      if(!layer.marker){
-        layer.marker=L.circleMarker([s.lastPoint.lat,s.lastPoint.lng],{
-          radius:s.active?10:7,fillColor:color,fillOpacity:1,color:'#fff',weight:2
-        }).addTo(map);
-        layer.marker.bindPopup(`<b>#${s.id}</b><br>${s.active?'🟢 En vivo':'⬛ Finalizada'}<br>📍 ${s.pointCount} puntos`);
-        layer.marker.on('click',()=>selectSession(s.id));
-      }else{
-        layer.marker.setLatLng([s.lastPoint.lat,s.lastPoint.lng]);
-        layer.marker.setStyle({radius:s.active?10:7,fillColor:color});
-        layer.marker.setPopupContent(`<b>#${s.id}</b><br>${s.active?'🟢 En vivo':'⬛ Finalizada'}<br>📍 ${s.pointCount} puntos`);
-      }
-
-      // Pulse effect for active
-      if(s.active&&!layer.pulseMarker){
-        layer.pulseMarker=L.circleMarker([s.lastPoint.lat,s.lastPoint.lng],{
-          radius:16,fillColor:color,fillOpacity:.15,color:color,weight:1,opacity:.3
-        }).addTo(map);
-      }else if(s.active&&layer.pulseMarker){
-        layer.pulseMarker.setLatLng([s.lastPoint.lat,s.lastPoint.lng]);
-      }else if(!s.active&&layer.pulseMarker){
-        map.removeLayer(layer.pulseMarker);layer.pulseMarker=null;
-      }
-    }
-  });
-}
-
-async function selectSession(id){
-  selectedSession=id;
-  renderSessionList();
-  await updateDetail(id);
-
-  // Fetch full session and draw route
-  try{
-    const res=await fetch(`/api/session/${id}`);
-    const data=await res.json();
-    if(data.points.length>0){
-      const idx=allSessions.findIndex(s=>s.id===id);
-      const color=COLORS[idx%COLORS.length];
-      const layer=sessionLayers[id];
-
-      // Remove old polyline
-      if(layer.polyline)map.removeLayer(layer.polyline);
-      if(layer.startMarker)map.removeLayer(layer.startMarker);
-
-      // Draw route
-      const latlngs=data.points.map(p=>[p.lat,p.lng]);
-      layer.polyline=L.polyline(latlngs,{color:color,weight:3,opacity:.7}).addTo(map);
-
-      // Start marker
-      layer.startMarker=L.circleMarker([data.points[0].lat,data.points[0].lng],{
-        radius:6,fillColor:'#fff',fillOpacity:1,color:color,weight:2
-      }).addTo(map).bindPopup('Inicio');
-
-      // Fit bounds
-      map.fitBounds(layer.polyline.getBounds(),{padding:[50,50]});
-    }
-  }catch(e){}
-}
-
-async function updateDetail(id){
-  const panel=document.getElementById('detailPanel');
-  panel.classList.add('open');
-  document.getElementById('detailId').textContent='#'+id;
-
-  try{
-    const res=await fetch(`/api/session/${id}`);
-    const data=await res.json();
-
-    const badge=document.getElementById('detailBadge');
-    if(data.stopped){badge.className='badge badge-stopped';badge.textContent='FINALIZADA'}
-    else if(data.active){badge.className='badge badge-live';badge.innerHTML='<span></span>EN VIVO'}
-    else{badge.className='badge badge-waiting';badge.textContent='ESPERANDO'}
-
-    let html='';
-
-    // Stats
-    if(data.pointCount>0){
-      let dist=0;
-      for(let i=1;i<data.points.length;i++)dist+=haversine(data.points[i-1],data.points[i]);
-      const distStr=dist>1000?(dist/1000).toFixed(1)+' km':Math.round(dist)+' m';
-      let timeStr='—';
-      if(data.points.length>=2){
-        const mins=Math.round((new Date(data.points[data.points.length-1].timestamp)-new Date(data.points[0].timestamp))/60000);
-        timeStr=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m';
-      }
-      html+=`<div class="stat-row">
-        <div class="stat-item"><div class="stat-val">${data.pointCount}</div><div class="stat-lbl">PUNTOS</div></div>
-        <div class="stat-item"><div class="stat-val">${distStr}</div><div class="stat-lbl">DISTANCIA</div></div>
-        <div class="stat-item"><div class="stat-val">${timeStr}</div><div class="stat-lbl">TIEMPO</div></div>
-      </div>`;
-
-      // Last position
-      const last=data.points[data.points.length-1];
-      html+=`<div class="coords-small">📍 ${last.lat.toFixed(6)}, ${last.lng.toFixed(6)}</div>`;
-      html+=`<a href="https://www.google.com/maps?q=${last.lat},${last.lng}" target="_blank" style="display:block;text-align:center;padding:8px;background:rgba(45,138,110,.08);border-radius:8px;color:#34d399;font-size:12px;font-weight:600;text-decoration:none;margin:8px 0">🗺 Google Maps →</a>`;
-    }
-
-    // Photo
-    if(data.hasPhoto){
-      try{
-        const pRes=await fetch(`/api/photo/${id}`);
-        const pData=await pRes.json();
-        html+=`<img class="photo-thumb" src="${pData.photo}" onclick="window.open(this.src)"/>
-        <div style="font-size:10px;color:#6a7a80;text-align:center">📸 ${new Date(pData.photoAt).toLocaleString('es-AR')}</div>`;
-      }catch(e){}
-    }
-
-    // Events
-    html+='<div style="font-size:11px;color:#6a7a80;font-weight:600;letter-spacing:.5px;margin:14px 0 8px">REGISTRO:</div>';
-    const ev=(icon,text,time)=>`<div class="event-row"><span class="event-icon">${icon}</span><span class="event-text">${text}</span><span class="event-time">${time||''}</span></div>`;
-    html+=ev('🔗','Sesión creada',new Date(data.createdAt).toLocaleTimeString('es-AR'));
-    if(data.openedAt)html+=ev('📱','Link abierto',new Date(data.openedAt).toLocaleTimeString('es-AR'));
-    if(data.termsAcceptedAt)html+=ev('✅','T&C aceptados',new Date(data.termsAcceptedAt).toLocaleTimeString('es-AR'));
-    if(data.pointCount>0)html+=ev('📍','Tracking ('+data.pointCount+' pts)',new Date(data.points[0].timestamp).toLocaleTimeString('es-AR'));
-    if(data.hasPhoto)html+=ev('📸','Foto enviada',data.photoAt?new Date(data.photoAt).toLocaleTimeString('es-AR'):'');
-    if(data.stopped)html+=ev('⬛','Finalizada','');
-
-    // Action buttons
-    if(data.active){
-      html+=`<button class="btn btn-red" style="width:100%;margin-top:12px" onclick="stopSession('${id}')">⬛ Detener seguimiento</button>`;
-    }
-    html+=`<button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="copySessionLink('${id}')">📋 Copiar link</button>`;
-
-    document.getElementById('detailBody').innerHTML=html;
-  }catch(e){document.getElementById('detailBody').innerHTML='<p style="color:#c04040">Error</p>'}
-}
-
-function closeDetail(){
-  document.getElementById('detailPanel').classList.remove('open');
-  selectedSession=null;
-  renderSessionList();
-  // Remove route polylines
-  for(const id in sessionLayers){
-    const l=sessionLayers[id];
-    if(l.polyline){map.removeLayer(l.polyline);l.polyline=null}
-    if(l.startMarker){map.removeLayer(l.startMarker);l.startMarker=null}
+function copiarLink(){
+  var el=document.getElementById('linkUrl');
+  if(el){
+    navigator.clipboard.writeText(el.textContent).then(function(){
+      el.style.background='rgba(45,138,110,.2)';
+      setTimeout(function(){el.style.background='rgba(0,0,0,.3)';},1500);
+    });
   }
 }
 
-async function createSession(){
-  const btn=document.querySelector('.btn-green');
-  btn.textContent='Creando...';btn.disabled=true;
+function cerrarLinkBox(){linkBoxId=null;renderLista();}
+
+function actualizarMapa(){
+  for(var i=0;i<sesiones.length;i++){
+    var s=sesiones[i];
+    var col=COLS[i%COLS.length];
+    if(!capas[s.id])capas[s.id]={mk:null,pulse:null,pl:null,start:null,cnt:0};
+    var L2=capas[s.id];
+    if(s.pointCount>0&&s.lastPoint){
+      if(!L2.mk){
+        L2.mk=L.circleMarker([s.lastPoint.lat,s.lastPoint.lng],{radius:s.active?10:7,fillColor:col,fillOpacity:1,color:'#fff',weight:2}).addTo(map);
+        L2.mk.bindPopup('<b>#'+s.id+'</b><br>'+(s.active?'🟢 En vivo':'⬛ Fin')+'<br>📍 '+s.pointCount+' pts');
+        L2.mk.on('click',function(id){return function(){seleccionar(id);};}(s.id));
+      }else{
+        L2.mk.setLatLng([s.lastPoint.lat,s.lastPoint.lng]);
+        L2.mk.setStyle({radius:s.active?10:7,fillColor:col});
+        L2.mk.setPopupContent('<b>#'+s.id+'</b><br>'+(s.active?'🟢 En vivo':'⬛ Fin')+'<br>📍 '+s.pointCount+' pts');
+      }
+      if(s.active&&!L2.pulse){
+        L2.pulse=L.circleMarker([s.lastPoint.lat,s.lastPoint.lng],{radius:18,fillColor:col,fillOpacity:.12,color:col,weight:1,opacity:.2}).addTo(map);
+      }else if(s.active&&L2.pulse){L2.pulse.setLatLng([s.lastPoint.lat,s.lastPoint.lng]);}
+      else if(!s.active&&L2.pulse){map.removeLayer(L2.pulse);L2.pulse=null;}
+    }
+  }
+}
+
+async function seleccionar(id){
+  selId=id;renderLista();
   try{
-    const res=await fetch('/api/session',{method:'POST'});
-    const data=await res.json();
-    const link=window.location.origin+data.url;
-    document.getElementById('bannerLink').textContent=link;
-    document.getElementById('overlay').style.display='block';
-    document.getElementById('newBanner').style.display='block';
-    pollAll();
-  }catch(e){alert('El servidor puede estar iniciando. Esperá 30 seg y probá de nuevo.')}
-  btn.textContent='+ Nueva solicitud';btn.disabled=false;
+    var r=await fetch('/api/session/'+id);
+    var d=await r.json();
+    var idx=sesiones.findIndex(function(x){return x.id===id;});
+    var col=COLS[idx%COLS.length];
+    var L2=capas[id];
+    if(L2&&L2.pl){map.removeLayer(L2.pl);L2.pl=null;}
+    if(L2&&L2.start){map.removeLayer(L2.start);L2.start=null;}
+    if(d.points.length>0){
+      var ll=d.points.map(function(p){return[p.lat,p.lng];});
+      L2.pl=L.polyline(ll,{color:col,weight:3,opacity:.7}).addTo(map);
+      L2.start=L.circleMarker([d.points[0].lat,d.points[0].lng],{radius:5,fillColor:'#fff',fillOpacity:1,color:col,weight:2}).addTo(map);
+      map.fitBounds(L2.pl.getBounds(),{padding:[50,50]});
+    }
+    mostrarDetalle(d,id);
+  }catch(e){}
 }
 
-function copyBannerLink(){
-  const link=document.getElementById('bannerLink').textContent;
-  navigator.clipboard.writeText(link).then(()=>{
-    event.target.textContent='✓ Copiado!';
-    setTimeout(()=>event.target.textContent='📋 Copiar link',2000);
-  });
+function mostrarDetalle(d,id){
+  document.getElementById('dpanel').classList.remove('hide');
+  document.getElementById('did').textContent='#'+id;
+  var bg=document.getElementById('dbadge');
+  if(d.stopped){bg.className='badge b-stop';bg.textContent='FINALIZADA';}
+  else if(d.active){bg.className='badge b-live';bg.innerHTML='<span class="dot"></span>EN VIVO';}
+  else{bg.className='badge b-wait';bg.textContent='ESPERANDO';}
+
+  var h='';
+  if(d.pointCount>0){
+    var dist=0;
+    for(var i=1;i<d.points.length;i++)dist+=hav(d.points[i-1],d.points[i]);
+    var ds=dist>1000?(dist/1000).toFixed(1)+' km':Math.round(dist)+' m';
+    var ts='—';
+    if(d.points.length>=2){
+      var mins=Math.round((new Date(d.points[d.points.length-1].timestamp)-new Date(d.points[0].timestamp))/60000);
+      ts=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m';
+    }
+    h+='<div class="statrow"><div class="statbox"><div class="statv">'+d.pointCount+'</div><div class="statl">PUNTOS</div></div><div class="statbox"><div class="statv">'+ds+'</div><div class="statl">DISTANCIA</div></div><div class="statbox"><div class="statv">'+ts+'</div><div class="statl">TIEMPO</div></div></div>';
+    var last=d.points[d.points.length-1];
+    h+='<div class="coordbox">📍 '+last.lat.toFixed(6)+', '+last.lng.toFixed(6)+'</div>';
+    h+='<a class="gmaps" href="https://www.google.com/maps?q='+last.lat+','+last.lng+'" target="_blank">🗺 Google Maps →</a>';
+  }
+  if(d.hasPhoto){
+    (async function(){
+      try{var r=await fetch('/api/photo/'+id);var p=await r.json();
+      var img=document.createElement('img');img.src=p.photo;img.className='phthumb';img.onclick=function(){window.open(p.photo)};
+      var ph=document.getElementById('photoArea');if(ph)ph.appendChild(img);
+      }catch(e){}
+    })();
+    h+='<div id="photoArea" style="font-size:11px;color:#5a6a70">📸 Foto:</div>';
+  }
+  h+='<div style="font-size:10px;color:#5a6a70;font-weight:600;margin:12px 0 6px">REGISTRO:</div>';
+  function ev(ic,tx,tm){return '<div class="erow"><span>'+ic+'</span><span style="color:#a0a8ac">'+tx+'</span><span class="etime">'+(tm||'')+'</span></div>';}
+  h+=ev('🔗','Creada',new Date(d.createdAt).toLocaleTimeString('es-AR'));
+  if(d.openedAt)h+=ev('📱','Link abierto',new Date(d.openedAt).toLocaleTimeString('es-AR'));
+  if(d.termsAcceptedAt)h+=ev('✅','T&C aceptados',new Date(d.termsAcceptedAt).toLocaleTimeString('es-AR'));
+  if(d.pointCount>0)h+=ev('📍',d.pointCount+' puntos',new Date(d.points[0].timestamp).toLocaleTimeString('es-AR'));
+  if(d.hasPhoto)h+=ev('📸','Foto','');
+  if(d.stopped)h+=ev('⬛','Finalizada','');
+
+  if(d.active)h+='<button class="btn btn-red" style="width:100%;margin-top:10px" onclick="pararSesion(\''+id+'\')">⬛ Detener</button>';
+  h+='<button class="btn btn-outline" style="width:100%;margin-top:6px" onclick="navigator.clipboard.writeText(window.location.origin+\'/s/'+id+'\')">📋 Copiar link</button>';
+
+  document.getElementById('dbody').innerHTML=h;
 }
 
-function copySessionLink(id){
-  navigator.clipboard.writeText(window.location.origin+'/s/'+id);
+function cerrarDetalle(){
+  document.getElementById('dpanel').classList.add('hide');
+  selId=null;renderLista();
+  for(var id in capas){
+    if(capas[id].pl){map.removeLayer(capas[id].pl);capas[id].pl=null;}
+    if(capas[id].start){map.removeLayer(capas[id].start);capas[id].start=null;}
+  }
 }
 
-async function stopSession(id){
-  if(!confirm('¿Detener seguimiento?'))return;
-  await fetch(`/api/stop/${id}`,{method:'POST'});
-  pollAll();
+async function pararSesion(id){
+  if(!confirm('¿Detener?'))return;
+  await fetch('/api/stop/'+id,{method:'POST'});
+  cargarTodo();
 }
 
-function setFilter(f,btn){
-  filter=f;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+function filtrar(f,btn){
+  filtro=f;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
   btn.classList.add('active');
-  renderSessionList();
+  renderLista();
 }
 
-function haversine(a,b){const R=6371000,r=d=>d*Math.PI/180,dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng),x=Math.sin(dLat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
+function hav(a,b){var R=6371000,r=function(d){return d*Math.PI/180;},dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng),x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)*Math.sin(dLng/2);return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
 
-// Init
 initMap();
-pollAll();
-pollInterval=setInterval(pollAll,4000);
+cargarTodo();
+poll=setInterval(cargarTodo,4000);
 </script>
 </body>
 </html>
